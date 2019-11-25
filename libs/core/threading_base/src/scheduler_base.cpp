@@ -328,8 +328,7 @@ namespace hpx::threads::policies {
     void scheduler_base::add_scheduler_mode(scheduler_mode mode) noexcept
     {
         // distribute the same value across all cores
-        mode = scheduler_mode(get_scheduler_mode() | mode);
-        set_scheduler_mode(mode);
+        set_scheduler_mode(get_scheduler_mode() | mode);
     }
 
     void scheduler_base::remove_scheduler_mode(scheduler_mode mode) noexcept
