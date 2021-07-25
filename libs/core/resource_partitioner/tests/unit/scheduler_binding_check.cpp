@@ -61,14 +61,16 @@ void threadLoop()
         HPX_TEST_EQ(thread_actual, thread_expected);
     };
 
-    std::size_t threads = hpx::get_num_worker_threads();
     // launch tasks on threads using numbering 0,1,2,3...0,1,2,3
+    std::size_t threads = hpx::get_num_worker_threads();
     for (std::size_t i = 0; i < iterations; ++i)
     {
         auto exec = hpx::execution::parallel_executor(
             hpx::threads::thread_priority::bound,
             hpx::threads::thread_stacksize::default_,
-            hpx::threads::thread_schedule_hint(std::int16_t(i % threads)));
+            hpx::threads::thread_schedule_hint(
+                hpx::threads::thread_schedule_hint_mode::thread,
+                std::int16_t(i % threads)));
         hpx::async(exec, f, i, (i % threads)).get();
     }
 
@@ -87,9 +89,9 @@ void threadLoop()
 int hpx_main()
 {
     auto const current = hpx::threads::get_self_id_data()->get_scheduler_base();
-    std::cout << "Scheduler is " << current->get_description() << std::endl;
+    std::cout << "Scheduler is " << current->get_scheduler_name() << std::endl;
     if (std::string("core-shared_priority_queue_scheduler") !=
-        current->get_description())
+        current->get_scheduler_name())
     {
         std::cout << "The scheduler might not work properly " << std::endl;
     }

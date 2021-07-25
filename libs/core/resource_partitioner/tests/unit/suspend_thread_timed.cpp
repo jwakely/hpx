@@ -34,7 +34,7 @@ int hpx_main(int argc, char* argv[])
     hpx::threads::thread_pool_base& worker_pool =
         hpx::resource::get_thread_pool("default");
     std::cout << "Starting test with scheduler "
-              << worker_pool.get_scheduler()->get_description() << std::endl;
+              << worker_pool.get_scheduler()->get_scheduler_name() << std::endl;
     std::size_t const num_threads = hpx::resource::get_num_threads("default");
 
     HPX_TEST_EQ(max_threads, num_threads);

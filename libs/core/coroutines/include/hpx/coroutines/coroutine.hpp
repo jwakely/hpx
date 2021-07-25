@@ -149,6 +149,11 @@ namespace hpx::threads::coroutines {
             return impl_.result();
         }
 
+        HPX_FORCEINLINE result_type invoke_directly(arg_type arg = arg_type())
+        {
+            return impl_.invoke_directly(arg);
+        }
+
         bool is_ready() const noexcept
         {
             return impl_.is_ready();

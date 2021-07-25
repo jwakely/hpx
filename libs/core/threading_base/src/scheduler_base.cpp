@@ -500,7 +500,7 @@ namespace hpx::threads::policies {
 
     std::ostream& operator<<(std::ostream& os, scheduler_base const& scheduler)
     {
-        os << scheduler.get_description() << "(" << &scheduler << ")";
+        os << scheduler.get_scheduler_name() << "(" << &scheduler << ")";
 
         return os;
     }

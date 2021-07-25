@@ -52,9 +52,9 @@ inline std::size_t st_rand()
 int hpx_main(variables_map& vm)
 {
     auto const sched = hpx::threads::get_self_id_data()->get_scheduler_base();
-    std::cout << "Scheduler is " << sched->get_description() << std::endl;
+    std::cout << "Scheduler is " << sched->get_scheduler_name() << std::endl;
     if (std::string("core-shared_priority_queue_scheduler") ==
-        sched->get_description())
+        sched->get_scheduler_name())
     {
         std::cout << "Setting shared-priority mode flags" << std::endl;
         sched->add_remove_scheduler_mode(

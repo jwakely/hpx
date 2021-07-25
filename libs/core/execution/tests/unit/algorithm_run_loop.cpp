@@ -1505,9 +1505,10 @@ void test_keep_future_sender()
         ex::run_loop loop;
         auto sched = loop.get_scheduler();
 
-        auto sf = hpx::async([&]() {
+        auto f = hpx::async([&]() {
             return custom_type_non_default_constructible_non_copyable{42};
-        }).share();
+        });
+        auto sf = f.share();
 
         // NOTE: Without keep_future this should fail to compile, since
         // sync_wait would receive a const& to the value which requires a copy

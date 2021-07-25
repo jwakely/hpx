@@ -208,7 +208,7 @@ void measure_function_futures_limiting_executor(
 
     auto const sched = hpx::threads::get_self_id_data()->get_scheduler_base();
     if (std::string("core-shared_priority_queue_scheduler") ==
-        sched->get_description())
+        sched->get_scheduler_name())
     {
         sched->add_remove_scheduler_mode(
             // add these flags
@@ -377,7 +377,7 @@ void measure_function_futures_create_thread_hierarchical_placement(
     auto sched = hpx::threads::get_self_id_data()->get_scheduler_base();
 
     if (std::string("core-shared_priority_queue_scheduler") ==
-        sched->get_description())
+        sched->get_scheduler_name())
     {
         sched->add_remove_scheduler_mode(
             hpx::threads::policies::scheduler_mode::assign_work_thread_parent,

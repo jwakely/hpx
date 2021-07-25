@@ -181,7 +181,6 @@ namespace hpx::execution {
 
     private:
         // property implementations
-
 #if defined(HPX_HAVE_THREAD_DESCRIPTION)
         friend constexpr parallel_policy_executor tag_invoke(
             hpx::execution::experimental::with_annotation_t,

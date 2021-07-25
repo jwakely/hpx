@@ -1608,6 +1608,7 @@ namespace hpx {
 
         std::uint32_t current = (*it).second;
         (*it).second += cores_needed;
+
         return current;
     }
 

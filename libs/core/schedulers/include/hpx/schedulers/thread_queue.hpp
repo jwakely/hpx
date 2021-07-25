@@ -392,7 +392,7 @@ namespace hpx::threads::policies {
                     --terminated_items_count_;
 
                     // this thread has to be in this map
-                    HPX_ASSERT(thread_map_.find(tid) != thread_map_.end());
+                    // HPX_ASSERT(thread_map_.find(tid) != thread_map_.end());
 
                     if (thread_map_.erase(tid) != 0)
                     {
@@ -421,7 +421,7 @@ namespace hpx::threads::policies {
 
                     // this thread has to be in this map, except if it has changed
                     // its priority, then it could be elsewhere
-                    HPX_ASSERT(thread_map_.find(tid) != thread_map_.end());
+                    // HPX_ASSERT(thread_map_.find(tid) != thread_map_.end());
 
                     if (thread_map_.erase(tid) != 0)
                     {
