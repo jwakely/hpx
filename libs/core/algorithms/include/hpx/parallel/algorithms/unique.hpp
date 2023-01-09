@@ -31,7 +31,7 @@ namespace hpx {
     ///                     requirements of \a CopyConstructible. This defaults
     ///                     to std::equal_to<>
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a parallel::util::projection_identity.
+    ///                     defaults to \a hpx::identity.
     ///
     /// \param first        Refers to the beginning of the sequence of elements
     ///                     the algorithm will be applied to.
@@ -62,8 +62,8 @@ namespace hpx {
     ///           of the range.
     ///
     template <typename FwdIter,
-        typename Pred = hpx::parallel::v1::detail::equal_to,
-        typename Proj = parallel::util::projection_identity>
+        typename Pred = hpx::parallel::detail::equal_to,
+        typename Proj = hpx::identity>
     FwdIter unique(FwdIter first, FwdIter last, Pred&& pred = Pred(),
         Proj&& proj = Proj());
 
@@ -91,7 +91,7 @@ namespace hpx {
     ///                     requirements of \a CopyConstructible. This defaults
     ///                     to std::equal_to<>
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a parallel::util::projection_identity.
+    ///                     defaults to \a hpx::identity.
     ///
     /// \param policy       The execution policy to use for the scheduling of
     ///                     the iterations.
@@ -137,8 +137,8 @@ namespace hpx {
     ///           of the range.
     ///
     template <typename ExPolicy, typename FwdIter,
-        typename Pred = hpx::parallel::v1::detail::equal_to,
-        typename Proj = parallel::util::projection_identity>
+        typename Pred = hpx::parallel::detail::equal_to,
+        typename Proj = hpx::identity>
     typename parallel::util::detail::algorithm_result<ExPolicy,
         FwdIter>::type
     unique(ExPolicy&& policy, FwdIter first, FwdIter last,
@@ -168,7 +168,7 @@ namespace hpx {
     ///                     requirements of \a CopyConstructible. This defaults
     ///                     to std::equal_to<>
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a util::projection_identity
+    ///                     defaults to \a hpx::identity
     ///
     /// \param first        Refers to the beginning of the sequence of elements
     ///                     the algorithm will be applied to.
@@ -200,8 +200,8 @@ namespace hpx {
     ///           iterator to the end of the \a dest range.
     ///
     template <typename InIter, typename OutIter,
-        typename Pred = hpx::parallel::v1::detail::equal_to,
-        typename Proj = parallel::util::projection_identity>
+        typename Pred = hpx::parallel::detail::equal_to,
+        typename Proj = hpx::identity>
     OutIter unique_copy(InIter first, InIter last, OutIter dest,
         Pred&& pred = Pred(), Proj&& proj = Proj());
 
@@ -233,7 +233,7 @@ namespace hpx {
     ///                     requirements of \a CopyConstructible. This defaults
     ///                     to std::equal_to<>
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a parallel::util::projection_identity.
+    ///                     defaults to \a hpx::identity.
     ///
     /// \param policy       The execution policy to use for the scheduling of
     ///                     the iterations.
@@ -281,8 +281,8 @@ namespace hpx {
     ///           the destination iterator to the end of the \a dest range.
     ///
     template <typename ExPolicy, typename FwdIter1, typename FwdIter2,
-        typename Pred = hpx::parallel::v1::detail::equal_to,
-        typename Proj = parallel::util::projection_identity>
+        typename Pred = hpx::parallel::detail::equal_to,
+        typename Proj = hpx::identity>
     typename parallel::util::detail::algorithm_result<ExPolicy,
         FwdIter2>::type
      unique_copy(ExPolicy&& policy, FwdIter1 first, FwdIter1 last,
@@ -298,7 +298,6 @@ namespace hpx {
 #include <hpx/functional/invoke.hpp>
 #include <hpx/iterator_support/traits/is_iterator.hpp>
 #include <hpx/type_support/unused.hpp>
-
 #include <hpx/algorithms/traits/projected.hpp>
 #include <hpx/execution/algorithms/detail/is_negative.hpp>
 #include <hpx/execution/algorithms/detail/predicates.hpp>
@@ -313,7 +312,7 @@ namespace hpx {
 #include <hpx/parallel/util/foreach_partitioner.hpp>
 #include <hpx/parallel/util/loop.hpp>
 #include <hpx/parallel/util/partitioner.hpp>
-#include <hpx/parallel/util/projection_identity.hpp>
+#include <hpx/type_support/identity.hpp>
 #include <hpx/parallel/util/scan_partitioner.hpp>
 #include <hpx/parallel/util/transfer.hpp>
 #include <hpx/parallel/util/zip_iterator.hpp>
@@ -331,7 +330,7 @@ namespace hpx {
 #include <utility>
 #include <vector>
 
-namespace hpx { namespace parallel { inline namespace v1 {
+namespace hpx::parallel {
     /////////////////////////////////////////////////////////////////////////////
     // unique
     namespace detail {
@@ -385,7 +384,7 @@ namespace hpx { namespace parallel { inline namespace v1 {
             template <typename ExPolicy, typename FwdIter, typename Sent,
                 typename Pred, typename Proj>
             static
-                typename util::detail::algorithm_result<ExPolicy, FwdIter>::type
+                util::detail::algorithm_result_t<ExPolicy, FwdIter>
                 parallel(ExPolicy&& policy, FwdIter first, Sent last,
                     Pred&& pred, Proj&& proj)
             {
@@ -481,10 +480,9 @@ namespace hpx { namespace parallel { inline namespace v1 {
 
     // clang-format off
     template <typename ExPolicy, typename FwdIter,
-        typename Pred = detail::equal_to,
-        typename Proj = util::projection_identity,
+        typename Pred = detail::equal_to, typename Proj = hpx::identity,
         HPX_CONCEPT_REQUIRES_(
-            hpx::is_execution_policy<ExPolicy>::value &&
+            hpx::is_execution_policy_v<ExPolicy> &&
             hpx::traits::is_iterator_v<FwdIter> &&
             traits::is_projected<Proj, FwdIter>::value &&
             traits::is_indirect_callable<ExPolicy, Pred,
@@ -495,11 +493,11 @@ namespace hpx { namespace parallel { inline namespace v1 {
     HPX_DEPRECATED_V(1, 8,
         "hpx::parallel::unique is deprecated, use "
         "hpx::unique instead")
-        typename util::detail::algorithm_result<ExPolicy, FwdIter>::type
+        util::detail::algorithm_result_t<ExPolicy, FwdIter>
         unique(ExPolicy&& policy, FwdIter first, FwdIter last,
             Pred&& pred = Pred(), Proj&& proj = Proj())
     {
-        static_assert((hpx::traits::is_forward_iterator_v<FwdIter>),
+        static_assert(hpx::traits::is_forward_iterator_v<FwdIter>,
             "Required at least forward iterator.");
 
 #if defined(HPX_GCC_VERSION) && HPX_GCC_VERSION >= 100000
@@ -715,9 +713,9 @@ namespace hpx { namespace parallel { inline namespace v1 {
     // clang-format off
     template <typename ExPolicy, typename FwdIter1, typename FwdIter2,
         typename Pred = detail::equal_to,
-        typename Proj = util::projection_identity,
+        typename Proj = hpx::identity,
         HPX_CONCEPT_REQUIRES_(
-            hpx::is_execution_policy<ExPolicy>::value &&
+            hpx::is_execution_policy_v<ExPolicy> &&
             hpx::traits::is_iterator_v<FwdIter1> &&
             hpx::traits::is_iterator_v<FwdIter2> &&
             traits::is_projected<Proj, FwdIter1>::value &&
@@ -734,9 +732,9 @@ namespace hpx { namespace parallel { inline namespace v1 {
         unique_copy(ExPolicy&& policy, FwdIter1 first, FwdIter1 last,
             FwdIter2 dest, Pred&& pred = Pred(), Proj&& proj = Proj())
     {
-        static_assert((hpx::traits::is_forward_iterator_v<FwdIter1>),
+        static_assert(hpx::traits::is_forward_iterator_v<FwdIter1>,
             "Required at least forward iterator.");
-        static_assert((hpx::traits::is_forward_iterator_v<FwdIter2>),
+        static_assert(hpx::traits::is_forward_iterator_v<FwdIter2>,
             "Requires at least forward iterator.");
 
         using result_type = parallel::util::in_out_result<FwdIter1, FwdIter2>;
@@ -752,7 +750,7 @@ namespace hpx { namespace parallel { inline namespace v1 {
 #pragma GCC diagnostic pop
 #endif
     }
-}}}    // namespace hpx::parallel::v1
+}    // namespace hpx::parallel
 
 namespace hpx {
     ///////////////////////////////////////////////////////////////////////////
@@ -762,8 +760,8 @@ namespace hpx {
     {
         // clang-format off
         template <typename FwdIter,
-            typename Pred = hpx::parallel::v1::detail::equal_to,
-            typename Proj = parallel::util::projection_identity,
+            typename Pred = hpx::parallel::detail::equal_to,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
                 hpx::traits::is_iterator_v<FwdIter> &&
                 parallel::traits::is_projected<Proj, FwdIter>::value &&
@@ -779,17 +777,17 @@ namespace hpx {
             static_assert(hpx::traits::is_forward_iterator_v<FwdIter>,
                 "Requires at least forward iterator.");
 
-            return hpx::parallel::v1::detail::unique<FwdIter>().call(
+            return hpx::parallel::detail::unique<FwdIter>().call(
                 hpx::execution::seq, first, last, HPX_FORWARD(Pred, pred),
                 HPX_FORWARD(Proj, proj));
         }
 
         // clang-format off
         template <typename ExPolicy, typename FwdIter,
-            typename Pred = hpx::parallel::v1::detail::equal_to,
-            typename Proj = parallel::util::projection_identity,
+            typename Pred = hpx::parallel::detail::equal_to,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_iterator_v<FwdIter> &&
                 parallel::traits::is_projected<Proj, FwdIter>::value &&
                 parallel::traits::is_indirect_callable<ExPolicy, Pred,
@@ -805,7 +803,7 @@ namespace hpx {
             static_assert(hpx::traits::is_forward_iterator_v<FwdIter>,
                 "Requires at least forward iterator.");
 
-            return hpx::parallel::v1::detail::unique<FwdIter>().call(
+            return hpx::parallel::detail::unique<FwdIter>().call(
                 HPX_FORWARD(ExPolicy, policy), first, last,
                 HPX_FORWARD(Pred, pred), HPX_FORWARD(Proj, proj));
         }
@@ -818,8 +816,8 @@ namespace hpx {
     {
         // clang-format off
         template <typename InIter, typename OutIter,
-            typename Pred = hpx::parallel::v1::detail::equal_to,
-            typename Proj = parallel::util::projection_identity,
+            typename Pred = hpx::parallel::detail::equal_to,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
                 hpx::traits::is_iterator_v<InIter> &&
                 hpx::traits::is_iterator_v<OutIter> &&
@@ -839,17 +837,17 @@ namespace hpx {
             using result_type = parallel::util::in_out_result<InIter, OutIter>;
 
             return parallel::util::get_second_element<InIter, OutIter>(
-                hpx::parallel::v1::detail::unique_copy<result_type>().call(
+                hpx::parallel::detail::unique_copy<result_type>().call(
                     hpx::execution::seq, first, last, dest,
                     HPX_FORWARD(Pred, pred), HPX_FORWARD(Proj, proj)));
         }
 
         // clang-format off
         template <typename ExPolicy, typename FwdIter1, typename FwdIter2,
-            typename Pred = hpx::parallel::v1::detail::equal_to,
-            typename Proj = parallel::util::projection_identity,
+            typename Pred = hpx::parallel::detail::equal_to,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_iterator_v<FwdIter1> &&
                 hpx::traits::is_iterator_v<FwdIter2> &&
                 parallel::traits::is_indirect_callable<ExPolicy, Pred,
@@ -870,7 +868,7 @@ namespace hpx {
                 parallel::util::in_out_result<FwdIter1, FwdIter2>;
 
             return parallel::util::get_second_element<FwdIter1, FwdIter2>(
-                hpx::parallel::v1::detail::unique_copy<result_type>().call(
+                hpx::parallel::detail::unique_copy<result_type>().call(
                     HPX_FORWARD(ExPolicy, policy), first, last, dest,
                     HPX_FORWARD(Pred, pred), HPX_FORWARD(Proj, proj)));
         }

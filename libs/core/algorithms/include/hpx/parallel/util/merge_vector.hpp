@@ -1,5 +1,5 @@
 //  Copyright (c) 2015-2017 Francisco Jose Tapia
-//  Copyright (c) 2020 Hartmut Kaiser
+//  Copyright (c) 2020-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <hpx/iterator_support/traits/is_iterator.hpp>
 #include <hpx/parallel/util/merge_four.hpp>
 
 #include <cstddef>
@@ -17,7 +18,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     /// Merge the ranges in the vector v_input using full_merge4. The v_output
     ///        vector is used as auxiliary memory in the internal process
@@ -35,11 +36,10 @@ namespace hpx { namespace parallel { namespace util {
         std::vector<util::range<Iter1, Sent1>>& v_output, Compare comp)
     {
         using range1_t = util::range<Iter1, Sent1>;
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         v_output.clear();
         if (v_input.size() == 0)
@@ -56,7 +56,7 @@ namespace hpx { namespace parallel { namespace util {
         std::uint32_t pos_ini = 0;
         while (pos_ini < v_input.size())
         {
-            std::uint32_t nmerge = (nrange + 3) >> 2;
+            std::uint32_t const nmerge = (nrange + 3) >> 2;
             std::uint32_t nelem = (nrange + nmerge - 1) / nmerge;
             range1_t rz = full_merge4(dest, &v_input[pos_ini], nelem, comp);
             v_output.emplace_back(rz);
@@ -81,10 +81,9 @@ namespace hpx { namespace parallel { namespace util {
         std::vector<util::range<Value*>>& v_output, Compare comp)
     {
         using range1_t = util::range<Value*>;
-        using type1 = typename std::iterator_traits<Iter>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter>;
 
-        static_assert(
-            std::is_same<type1, Value>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, Value>, "Incompatible iterators\n");
 
         v_output.clear();
         if (v_input.size() == 0)
@@ -101,7 +100,7 @@ namespace hpx { namespace parallel { namespace util {
         std::uint32_t pos_ini = 0;
         while (pos_ini < v_input.size())
         {
-            std::uint32_t nmerge = (nrange + 3) >> 2;
+            std::uint32_t const nmerge = (nrange + 3) >> 2;
             std::uint32_t nelem = (nrange + nmerge - 1) / nmerge;
             range1_t rz =
                 uninit_full_merge4(dest, &v_input[pos_ini], nelem, comp);
@@ -132,11 +131,10 @@ namespace hpx { namespace parallel { namespace util {
         std::vector<util::range<Iter2, Sent2>>& v_output, Compare comp)
     {
         using range2_t = util::range<Iter2, Sent2>;
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         v_output.clear();
         if (v_input.size() == 0)
@@ -165,6 +163,6 @@ namespace hpx { namespace parallel { namespace util {
                 nrange = v_output.size();
             }
         }
-        return (sw) ? v_output[0] : init_move(range_output, v_input[0]);
+        return sw ? v_output[0] : init_move(range_output, v_input[0]);
     }
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

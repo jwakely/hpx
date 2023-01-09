@@ -20,7 +20,7 @@
 #include <type_traits>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace hpx { namespace parallel { namespace util { namespace detail {
+namespace hpx::parallel::util::detail {
 
     template <typename Iterator, typename Enable = void>
     struct chunk_size_iterator_category;
@@ -127,23 +127,23 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
             if (current_ >= count_)
             {
                 // reached the end of the sequence
-                iterator() = parallel::v1::detail::next(
+                iterator() = parallel::detail::next(
                     iterator(), offset + last_chunk_size_);
                 chunk() = 0;
             }
             else if (current_ == count_ - last_chunk_size_)
             {
                 // reached last chunk
-                iterator() = parallel::v1::detail::next(
-                    iterator(), offset + chunk_size_);
+                iterator() =
+                    parallel::detail::next(iterator(), offset + chunk_size_);
                 chunk() = last_chunk_size_;
             }
             else
             {
                 // normal chunk
                 HPX_ASSERT(current_ < count_ - last_chunk_size_);
-                iterator() = parallel::v1::detail::next(
-                    iterator(), offset + chunk_size_);
+                iterator() =
+                    parallel::detail::next(iterator(), offset + chunk_size_);
                 chunk() = chunk_size_;
             }
         }
@@ -174,7 +174,7 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
                 chunk() = chunk_size_;
             }
 
-            iterator() = parallel::v1::detail::next(
+            iterator() = parallel::detail::next(
                 iterator(), -static_cast<std::ptrdiff_t>(offset + chunk()));
         }
 
@@ -212,7 +212,7 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
             chunk_size_iterator const& rhs) const noexcept
         {
             return static_cast<std::ptrdiff_t>(
-                ((rhs.iterator() - iterator()) + chunk_size_ - 1) /
+                (rhs.iterator() - iterator() + chunk_size_ - 1) /
                 chunk_size_);
         }
 
@@ -320,23 +320,23 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
             if (current_ >= count_)
             {
                 // reached the end of the sequence
-                iterator() = parallel::v1::detail::next(
+                iterator() = parallel::detail::next(
                     iterator(), offset + last_chunk_size_);
                 chunk() = 0;
             }
             else if (current_ == count_ - last_chunk_size_)
             {
                 // reached last chunk
-                iterator() = parallel::v1::detail::next(
-                    iterator(), offset + chunk_size_);
+                iterator() =
+                    parallel::detail::next(iterator(), offset + chunk_size_);
                 chunk() = last_chunk_size_;
             }
             else
             {
                 // normal chunk
                 HPX_ASSERT(current_ < count_ - last_chunk_size_);
-                iterator() = parallel::v1::detail::next(
-                    iterator(), offset + chunk_size_);
+                iterator() =
+                    parallel::detail::next(iterator(), offset + chunk_size_);
                 chunk() = chunk_size_;
             }
         }
@@ -369,7 +369,7 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
                 chunk() = chunk_size_;
             }
 
-            iterator() = parallel::v1::detail::next(
+            iterator() = parallel::detail::next(
                 iterator(), -static_cast<std::ptrdiff_t>(offset + chunk()));
         }
 
@@ -407,7 +407,7 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
             chunk_size_idx_iterator const& rhs) const noexcept
         {
             return static_cast<std::ptrdiff_t>(
-                ((rhs.iterator() - iterator()) + chunk_size_ - 1) /
+                (rhs.iterator() - iterator() + chunk_size_ - 1) /
                 chunk_size_);
         }
 
@@ -418,4 +418,4 @@ namespace hpx { namespace parallel { namespace util { namespace detail {
         std::size_t count_ = 0;
         std::size_t current_ = 0;
     };
-}}}}    // namespace hpx::parallel::util::detail
+}    // namespace hpx::parallel::util::detail

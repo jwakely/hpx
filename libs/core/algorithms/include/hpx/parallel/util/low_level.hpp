@@ -1,5 +1,5 @@
 //  Copyright (c) 2015-2017 Francisco Jose Tapia
-//  Copyright (c) 2020-2022 Hartmut Kaiser
+//  Copyright (c) 2020-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -9,6 +9,7 @@
 
 #include <hpx/config/forward.hpp>
 #include <hpx/config/move.hpp>
+#include <hpx/iterator_support/traits/is_iterator.hpp>
 #include <hpx/type_support/construct_at.hpp>
 
 #include <algorithm>
@@ -19,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     /// \brief create an object in the memory specified by ptr
     /// \tparam Value : typename of the object to create
@@ -47,8 +48,8 @@ namespace hpx { namespace parallel { namespace util {
     /// \param [in] val : object used for the initialization
     /// \return range initialized
     template <typename Iter, typename Sent>
-    inline void init(Iter first, Sent last,
-        typename std::iterator_traits<Iter>::value_type& val)
+    inline void init(
+        Iter first, Sent last, hpx::traits::iter_value_t<Iter>& val)
     {
         if (first == last)
         {
@@ -61,7 +62,7 @@ namespace hpx { namespace parallel { namespace util {
         while (it2 != last)
         {
             // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-            construct_object(std::addressof(*(it2++)), HPX_MOVE(*(it1++)));
+            construct_object(std::addressof(*it2++), HPX_MOVE(*it1++));
         }
 
         val = HPX_MOVE(*(last - 1));
@@ -89,7 +90,7 @@ namespace hpx { namespace parallel { namespace util {
         while (first != last)
         {
             // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-            *(it_dest++) = HPX_MOVE(*(first++));
+            *it_dest++ = HPX_MOVE(*first++);
         }
         return it_dest;
     }
@@ -100,18 +101,18 @@ namespace hpx { namespace parallel { namespace util {
     /// \param [in] ptr : pointer to the memory where to create the object
     /// \param [in] R : range to move
     template <typename Iter, typename Sent,
-        typename Value = typename std::iterator_traits<Iter>::value_type>
+        typename Value = hpx::traits::iter_value_t<Iter>>
     inline Value* uninit_move(Value* ptr, Iter first, Sent last)
     {
-        using value_type = typename std::iterator_traits<Iter>::value_type;
+        using value_type = hpx::traits::iter_value_t<Iter>;
 
         static_assert(
-            std::is_same<Value, value_type>::value, "Incompatible iterators\n");
+            std::is_same_v<Value, value_type>, "Incompatible iterators\n");
 
         while (first != last)
         {
             // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-            hpx::construct_at(ptr++, HPX_MOVE(*(first++)));
+            hpx::construct_at(ptr++, HPX_MOVE(*first++));
         }
 
         return ptr;
@@ -127,7 +128,7 @@ namespace hpx { namespace parallel { namespace util {
     {
         while (first != last)
         {
-            std::destroy_at(&(*(first++)));
+            std::destroy_at(&*first++);
         }
     }
 
@@ -143,21 +144,21 @@ namespace hpx { namespace parallel { namespace util {
     inline Iter2 full_merge(Iter1 buf1, Sent1 end_buf1, Iter1 buf2,
         Sent1 end_buf2, Iter2 buf_out, Compare comp)
     {
-        using value1_t = typename std::iterator_traits<Iter1>::value_type;
-        using value2_t = typename std::iterator_traits<Iter2>::value_type;
+        using value1_t = hpx::traits::iter_value_t<Iter1>;
+        using value2_t = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(std::is_same<value1_t, value2_t>::value,
-            "Incompatible iterators\n");
+        static_assert(
+            std::is_same_v<value1_t, value2_t>, "Incompatible iterators\n");
 
-        while ((buf1 != end_buf1) && (buf2 != end_buf2))
+        while (buf1 != end_buf1 && buf2 != end_buf2)
         {
-            *(buf_out++) = (!comp(*buf2, *buf1)) ?
+            *buf_out++ = !comp(*buf2, *buf1) ?
                 // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                HPX_MOVE(*(buf1++)) :
+                HPX_MOVE(*buf1++) :
                 // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                HPX_MOVE(*(buf2++));
+                HPX_MOVE(*buf2++);
         }
-        return (buf1 == end_buf1) ? init_move(buf_out, buf2, end_buf2) :
+        return buf1 == end_buf1 ? init_move(buf_out, buf2, end_buf2) :
                                     init_move(buf_out, buf1, end_buf1);
     }
 
@@ -173,21 +174,20 @@ namespace hpx { namespace parallel { namespace util {
     inline Value* uninit_full_merge(Iter first1, Sent last1, Iter first2,
         Sent last2, Value* it_out, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter>;
 
-        static_assert(
-            std::is_same<Value, type1>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<Value, type1>, "Incompatible iterators\n");
 
         while (first1 != last1 && first2 != last2)
         {
-            construct((it_out++),
-                (!comp(*first2, *first1)) ?
+            construct(it_out++,
+                !comp(*first2, *first1) ?
                     // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                    HPX_MOVE(*(first1++)) :
+                    HPX_MOVE(*first1++) :
                     // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                    HPX_MOVE(*(first2++)));
+                    HPX_MOVE(*first2++));
         };
-        return (first1 == last1) ? uninit_move(it_out, first2, last2) :
+        return first1 == last1 ? uninit_move(it_out, first2, last2) :
                                    uninit_move(it_out, first1, last1);
     }
 
@@ -208,21 +208,21 @@ namespace hpx { namespace parallel { namespace util {
     inline Iter2 half_merge(Iter1 buf1, Sent1 end_buf1, Iter2 buf2,
         Sent2 end_buf2, Iter2 buf_out, Compare comp)
     {
-        using value1_t = typename std::iterator_traits<Iter1>::value_type;
-        using value2_t = typename std::iterator_traits<Iter2>::value_type;
+        using value1_t = hpx::traits::iter_value_t<Iter1>;
+        using value2_t = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(std::is_same<value1_t, value2_t>::value,
-            "Incompatible iterators\n");
+        static_assert(
+            std::is_same_v<value1_t, value2_t>, "Incompatible iterators\n");
 
-        while ((buf1 != end_buf1) && (buf2 != end_buf2))
+        while (buf1 != end_buf1 && buf2 != end_buf2)
         {
-            *(buf_out++) = (!comp(*buf2, *buf1)) ?
+            *buf_out++ = !comp(*buf2, *buf1) ?
                 // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                HPX_MOVE(*(buf1++)) :
+                HPX_MOVE(*buf1++) :
                 // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                HPX_MOVE(*(buf2++));
+                HPX_MOVE(*buf2++);
         }
-        return (buf2 == end_buf2) ? init_move(buf_out, buf1, end_buf1) :
+        return buf2 == end_buf2 ? init_move(buf_out, buf1, end_buf1) :
                                     end_buf2;
     }
 
@@ -243,14 +243,12 @@ namespace hpx { namespace parallel { namespace util {
     bool in_place_merge_uncontiguous(Iter1 src1, Sent1 end_src1, Iter2 src2,
         Sent2 end_src2, Iter3 aux, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
-        using type3 = typename std::iterator_traits<Iter3>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
+        using type3 = hpx::traits::iter_value_t<Iter3>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
-        static_assert(
-            std::is_same<type3, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type3, type2>, "Incompatible iterators\n");
 
         if (src1 == end_src1 || src2 == end_src2 ||
             !comp(*src2, *(end_src1 - 1)))
@@ -267,9 +265,9 @@ namespace hpx { namespace parallel { namespace util {
         Iter2 src2_first = src2;
         init_move(aux, src1, end_src1);
 
-        while ((src1 != end_src1) && (src2 != end_src2))
+        while (src1 != end_src1 && src2 != end_src2)
         {
-            *(src1++) = std::move((!comp(*src2, *aux)) ? *(aux++) : *(src2++));
+            *src1++ = std::move(!comp(*src2, *aux) ? *aux++ : *src2++);
         }
 
         if (src2 == end_src2)
@@ -277,7 +275,7 @@ namespace hpx { namespace parallel { namespace util {
             while (src1 != end_src1)
             {
                 // NOLINTNEXTLINE(bugprone-macro-repeated-side-effects)
-                *(src1++) = HPX_MOVE(*(aux++));
+                *src1++ = HPX_MOVE(*aux++);
             }
             init_move(src2_first, aux, end_aux);
         }
@@ -305,11 +303,10 @@ namespace hpx { namespace parallel { namespace util {
     inline bool in_place_merge(
         Iter1 src1, Iter1 src2, Sent1 end_src2, Iter2 buf, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         if (src1 == src2 || src2 == end_src2 || !comp(*src2, *(src2 - 1)))
         {
@@ -332,4 +329,4 @@ namespace hpx { namespace parallel { namespace util {
         half_merge(buf, buf + nx, src2, end_src2, src1, comp);
         return false;
     }
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

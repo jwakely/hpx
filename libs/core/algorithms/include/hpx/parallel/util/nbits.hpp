@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     inline constexpr std::uint32_t const tmsb[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4,
         4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6,
@@ -30,10 +30,10 @@ namespace hpx { namespace parallel { namespace util {
     /// \param [in] num : Number to examine
     /// \exception none
     /// \return Number of bits
-    constexpr inline std::uint32_t nbits32(std::uint32_t num) noexcept
+    inline constexpr std::uint32_t nbits32(std::uint32_t num) noexcept
     {
-        int Pos = (num & 0xffff0000U) ? 16 : 0;
-        if ((num >> Pos) & 0xff00U)
+        int Pos = num & 0xffff0000U ? 16 : 0;
+        if (num >> Pos & 0xff00U)
         {
             Pos += 8;
         }
@@ -44,17 +44,17 @@ namespace hpx { namespace parallel { namespace util {
     /// \param [in] num : Number to examine
     /// \exception none
     /// \return Number of bits
-    constexpr inline std::uint32_t nbits64(std::uint64_t num) noexcept
+    inline constexpr std::uint32_t nbits64(std::uint64_t num) noexcept
     {
-        uint32_t Pos = (num & 0xffffffff00000000ULL) ? 32 : 0;
-        if ((num >> Pos) & 0xffff0000ULL)
+        uint32_t Pos = num & 0xffffffff00000000ULL ? 32 : 0;
+        if (num >> Pos & 0xffff0000ULL)
         {
             Pos += 16;
         }
-        if ((num >> Pos) & 0xff00ULL)
+        if (num >> Pos & 0xff00ULL)
         {
             Pos += 8;
         }
         return tmsb[num >> Pos] + Pos;
     }
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

@@ -448,7 +448,7 @@ namespace hpx { namespace ranges { namespace experimental {
     ///
     template <typename ExPolicy, typename Iter, typename Sent, typename S,
         typename... Args>
-    typename parallel::util::detail::algorithm_result<ExPolicy>::type
+    hpx::util::detail::algorithm_result_t<ExPolicy>
     for_loop_strided(ExPolicy&& policy, Iter first, Sent last, S stride, Args&&... args);
 
     /// The for_loop_strided implements loop functionality over a range specified by
@@ -629,7 +629,7 @@ namespace hpx { namespace ranges { namespace experimental {
     ///           otherwise.
     ///
     template <typename ExPolicy, typename Rng, typename S, typename... Args>
-    typename hpx::parallel::util::detail::algorithm_result<ExPolicy>::type
+    hpx::util::detail::algorithm_result_t<ExPolicy>
     for_loop_strided(ExPolicy&& policy, Rng&& rng, S stride, Args&&... args);
 
     /// The for_loop_strided implements loop functionality over a range specified by
@@ -759,7 +759,7 @@ namespace hpx::ranges::experimental {
                 "for_loop must be called with at least a function object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop(
+            return hpx::parallel::detail::for_loop(
                 HPX_FORWARD(ExPolicy, policy), first, last,
                 make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
@@ -779,8 +779,8 @@ namespace hpx::ranges::experimental {
                 "for_loop must be called with at least a function object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop(hpx::execution::seq,
-                first, last, make_index_pack_t<sizeof...(Args) - 1>(),
+            return hpx::parallel::detail::for_loop(hpx::execution::seq, first,
+                last, make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
         }
 
@@ -799,7 +799,7 @@ namespace hpx::ranges::experimental {
                 "for_loop must be called with at least a function object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop(
+            return hpx::parallel::detail::for_loop(
                 HPX_FORWARD(ExPolicy, policy), hpx::util::begin(rng),
                 hpx::util::end(rng), make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
@@ -818,7 +818,7 @@ namespace hpx::ranges::experimental {
                 "for_loop must be called with at least a function object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop(hpx::execution::seq,
+            return hpx::parallel::detail::for_loop(hpx::execution::seq,
                 hpx::util::begin(rng), hpx::util::end(rng),
                 make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
@@ -848,7 +848,7 @@ namespace hpx::ranges::experimental {
                 "object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop_strided(
+            return hpx::parallel::detail::for_loop_strided(
                 HPX_FORWARD(ExPolicy, policy), first, last, stride,
                 make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
@@ -871,9 +871,8 @@ namespace hpx::ranges::experimental {
                 "object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop_strided(
-                hpx::execution::seq, first, last, stride,
-                make_index_pack_t<sizeof...(Args) - 1>(),
+            return hpx::parallel::detail::for_loop_strided(hpx::execution::seq,
+                first, last, stride, make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
         }
 
@@ -894,7 +893,7 @@ namespace hpx::ranges::experimental {
                 "object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop_strided(
+            return hpx::parallel::detail::for_loop_strided(
                 HPX_FORWARD(ExPolicy, policy), hpx::util::begin(rng),
                 hpx::util::end(rng), stride,
                 make_index_pack_t<sizeof...(Args) - 1>(),
@@ -917,9 +916,9 @@ namespace hpx::ranges::experimental {
                 "object");
 
             using hpx::util::make_index_pack_t;
-            return hpx::parallel::v2::detail::for_loop_strided(
-                hpx::execution::seq, hpx::util::begin(rng), hpx::util::end(rng),
-                stride, make_index_pack_t<sizeof...(Args) - 1>(),
+            return hpx::parallel::detail::for_loop_strided(hpx::execution::seq,
+                hpx::util::begin(rng), hpx::util::end(rng), stride,
+                make_index_pack_t<sizeof...(Args) - 1>(),
                 HPX_FORWARD(Args, args)...);
         }
     } for_loop_strided{};

@@ -15,6 +15,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx::parallel::util::detail {
+
     // Hand-crafted function object allowing to replace a more complex
     // bind(hpx::functional::invoke_fused(), f1, _1)
     template <typename Result, typename F>

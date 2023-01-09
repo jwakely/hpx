@@ -1,4 +1,4 @@
-//  Copyright (c) 2020-2022 Hartmut Kaiser
+//  Copyright (c) 2020-2023 Hartmut Kaiser
 //  Copyright (c) 2021 Giannis Gonidelis
 //  Copyright (c) 2021 Chuanqiu He
 //
@@ -20,7 +20,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     ///////////////////////////////////////////////////////////////////////////
     template <typename I1, typename I2>
@@ -137,8 +137,9 @@ namespace hpx { namespace parallel { namespace util {
         struct get_second_element
         {
             template <typename T>
-            auto operator()(T&& val) const -> decltype(
-                hpx::parallel::util::get_second_element(HPX_FORWARD(T, val)))
+            auto operator()(T&& val) const
+                -> decltype(hpx::parallel::util::get_second_element(
+                    HPX_FORWARD(T, val)))
             {
                 return hpx::parallel::util::get_second_element(
                     HPX_FORWARD(T, val));
@@ -375,6 +376,7 @@ namespace hpx { namespace parallel { namespace util {
 
     ///////////////////////////////////////////////////////////////////////////
     namespace detail {
+
         template <typename ZipIter>
         in_out_result<typename hpx::tuple_element<0,
                           typename ZipIter::iterator_tuple_type>::type,
@@ -485,13 +487,15 @@ namespace hpx { namespace parallel { namespace util {
                 });
         }
     }    // namespace detail
-}}}      // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util
 
-namespace hpx { namespace ranges {
+namespace hpx::ranges {
+
     using hpx::parallel::util::in_fun_result;
     using hpx::parallel::util::in_in_out_result;
     using hpx::parallel::util::in_in_result;
     using hpx::parallel::util::in_out_out_result;
     using hpx::parallel::util::in_out_result;
     using hpx::parallel::util::min_max_result;
-}}    // namespace hpx::ranges
+}    // namespace hpx::ranges
+     // namespace hpx::ranges

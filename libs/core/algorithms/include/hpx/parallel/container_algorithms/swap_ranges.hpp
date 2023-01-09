@@ -212,19 +212,17 @@ namespace hpx { namespace ranges {
 #else
 
 #include <hpx/config.hpp>
+#include <hpx/algorithms/traits/projected_range.hpp>
 #include <hpx/concepts/concepts.hpp>
 #include <hpx/iterator_support/range.hpp>
 #include <hpx/iterator_support/traits/is_range.hpp>
-
-#include <hpx/algorithms/traits/projected_range.hpp>
 #include <hpx/parallel/algorithms/swap_ranges.hpp>
 #include <hpx/parallel/util/detail/sender_util.hpp>
-#include <hpx/parallel/util/projection_identity.hpp>
 
 #include <type_traits>
 #include <utility>
 
-namespace hpx { namespace ranges {
+namespace hpx::ranges {
 
     ///////////////////////////////////////////////////////////////////////////
     template <typename Iter1, typename Iter2>
@@ -240,9 +238,9 @@ namespace hpx { namespace ranges {
         template <typename InIter1, typename Sent1, typename InIter2,
             typename Sent2,
             HPX_CONCEPT_REQUIRES_(
-                hpx::traits::is_iterator<InIter1>::value &&
+                hpx::traits::is_iterator_v<InIter1> &&
                 hpx::traits::is_sentinel_for<Sent1, InIter1>::value &&
-                hpx::traits::is_iterator<InIter2>::value &&
+                hpx::traits::is_iterator_v<InIter2> &&
                 hpx::traits::is_sentinel_for<Sent2, InIter2>::value
             )>
         // clang-format on
@@ -255,7 +253,7 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_input_iterator_v<InIter2>,
                 "Requires at least input iterator.");
 
-            return hpx::parallel::v1::detail::swap_ranges<
+            return hpx::parallel::detail::swap_ranges<
                 swap_ranges_result<InIter1, InIter2>>()
                 .call(hpx::execution::seq, first1, last1, first2, last2);
         }
@@ -264,10 +262,10 @@ namespace hpx { namespace ranges {
         template <typename ExPolicy, typename FwdIter1, typename Sent1,
             typename FwdIter2, typename Sent2,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
-                hpx::traits::is_iterator<FwdIter1>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
+                hpx::traits::is_iterator_v<FwdIter1> &&
                 hpx::traits::is_sentinel_for<Sent1, FwdIter1>::value &&
-                hpx::traits::is_iterator<FwdIter2>::value &&
+                hpx::traits::is_iterator_v<FwdIter2> &&
                 hpx::traits::is_sentinel_for<Sent2, FwdIter2>::value
             )>
         // clang-format on
@@ -281,7 +279,7 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_forward_iterator_v<FwdIter2>,
                 "Requires at least forward iterator.");
 
-            return hpx::parallel::v1::detail::swap_ranges<
+            return hpx::parallel::detail::swap_ranges<
                 swap_ranges_result<FwdIter1, FwdIter2>>()
                 .call(HPX_FORWARD(ExPolicy, policy), first1, last1, first2,
                     last2);
@@ -307,7 +305,7 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_input_iterator_v<iterator_type2>,
                 "Requires at least input iterator.");
 
-            return hpx::parallel::v1::detail::swap_ranges<
+            return hpx::parallel::detail::swap_ranges<
                 swap_ranges_result<iterator_type1, iterator_type2>>()
                 .call(hpx::execution::seq, std::begin(rng1), std::end(rng1),
                     std::begin(rng2), std::end(rng2));
@@ -316,7 +314,7 @@ namespace hpx { namespace ranges {
         // clang-format off
         template <typename ExPolicy, typename Rng1, typename Rng2,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_range<Rng1>::value &&
                 hpx::traits::is_range<Rng2>::value
             )>
@@ -335,12 +333,12 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_forward_iterator_v<iterator_type2>,
                 "Requires at least forward iterator.");
 
-            return hpx::parallel::v1::detail::swap_ranges<
+            return hpx::parallel::detail::swap_ranges<
                 swap_ranges_result<iterator_type1, iterator_type2>>()
                 .call(HPX_FORWARD(ExPolicy, policy), std::begin(rng1),
                     std::end(rng1), std::begin(rng2), std::end(rng2));
         }
     } swap_ranges{};
-}}    // namespace hpx::ranges
+}    // namespace hpx::ranges
 
 #endif

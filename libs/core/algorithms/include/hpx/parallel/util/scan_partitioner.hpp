@@ -36,7 +36,7 @@
 #include <vector>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     ///////////////////////////////////////////////////////////////////////////
     namespace detail {
@@ -253,4 +253,5 @@ namespace hpx { namespace parallel { namespace util {
             Result2>
     {
     };
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util
+     // namespace hpx::parallel::util

@@ -1,4 +1,4 @@
-//  Copyright (c) 2007-2016 Hartmut Kaiser
+//  Copyright (c) 2007-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -13,8 +13,10 @@
 #include <functional>
 #include <memory>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
+
     namespace detail {
+
         struct no_data
         {
         };
@@ -26,12 +28,12 @@ namespace hpx { namespace parallel { namespace util {
     class cancellation_token
     {
     private:
-        typedef std::atomic<T> flag_type;
+        using flag_type = std::atomic<T>;
         std::shared_ptr<flag_type> was_cancelled_;
 
     public:
-        cancellation_token(T data)
-          : was_cancelled_(std::make_shared<flag_type>(data))
+        explicit cancellation_token(T data)
+          : was_cancelled_(std::make_shared<flag_type>(HPX_MOVE(data)))
         {
         }
 
@@ -47,8 +49,9 @@ namespace hpx { namespace parallel { namespace util {
 
             do
             {
+                // break if we already have a closer match
                 if (Pred()(old_data, data))
-                    break;    // if we already have a closer one, break
+                    break;
 
             } while (!was_cancelled_->compare_exchange_strong(
                 old_data, data, std::memory_order_relaxed));
@@ -66,7 +69,7 @@ namespace hpx { namespace parallel { namespace util {
     class cancellation_token<detail::no_data, std::less_equal<detail::no_data>>
     {
     private:
-        typedef std::atomic<bool> flag_type;
+        using flag_type = std::atomic<bool>;
         std::shared_ptr<flag_type> was_cancelled_;
 
     public:
@@ -85,4 +88,4 @@ namespace hpx { namespace parallel { namespace util {
             was_cancelled_->store(true, std::memory_order_relaxed);
         }
     };
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

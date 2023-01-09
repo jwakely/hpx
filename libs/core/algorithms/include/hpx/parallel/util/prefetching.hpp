@@ -31,7 +31,7 @@
 #endif
 #endif
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     namespace prefetching {
 
@@ -139,7 +139,7 @@ namespace hpx { namespace parallel { namespace util {
             }
 
             inline difference_type operator-(
-                const prefetching_iterator& rhs) const
+                prefetching_iterator const& rhs) const
             {
                 // round up distance to cover all of underlying range
                 return (idx_ - rhs.idx_ + chunk_size_ - 1) / chunk_size_;
@@ -161,29 +161,29 @@ namespace hpx { namespace parallel { namespace util {
             }
 
             // FIXME: should other members be compared too?
-            inline bool operator==(const prefetching_iterator& rhs) const
+            inline bool operator==(prefetching_iterator const& rhs) const
             {
                 return idx_ == rhs.idx_ && base_ == rhs.base_;
             }
 
             // FIXME: should the base iterators be compared too?
-            inline bool operator!=(const prefetching_iterator& rhs) const
+            inline bool operator!=(prefetching_iterator const& rhs) const
             {
                 return idx_ != rhs.idx_;
             }
-            inline bool operator>(const prefetching_iterator& rhs) const
+            inline bool operator>(prefetching_iterator const& rhs) const
             {
                 return idx_ > rhs.idx_;
             }
-            inline bool operator<(const prefetching_iterator& rhs) const
+            inline bool operator<(prefetching_iterator const& rhs) const
             {
                 return idx_ < rhs.idx_;
             }
-            inline bool operator>=(const prefetching_iterator& rhs) const
+            inline bool operator>=(prefetching_iterator const& rhs) const
             {
                 return idx_ >= rhs.idx_;
             }
-            inline bool operator<=(const prefetching_iterator& rhs) const
+            inline bool operator<=(prefetching_iterator const& rhs) const
             {
                 return idx_ <= rhs.idx_;
             }
@@ -226,7 +226,7 @@ namespace hpx { namespace parallel { namespace util {
               : it_begin_(begin)
               , it_end_(end)
               , rngs_(rngs)
-              , chunk_size_((p_factor * threads::get_cache_line_size()) /
+              , chunk_size_(p_factor * threads::get_cache_line_size() /
                     sizeof_first_value_type)
               , range_size_(std::distance(begin, end))
             {
@@ -258,7 +258,7 @@ namespace hpx { namespace parallel { namespace util {
         HPX_FORCEINLINE void prefetch_containers(hpx::tuple<Ts...> const& t,
             hpx::util::index_pack<Is...>, std::size_t idx)
         {
-            prefetch_addresses((hpx::get<Is>(t).get())[idx]...);
+            prefetch_addresses(hpx::get<Is>(t).get()[idx]...);
         }
 #else
         template <typename... Ts, std::size_t... Is>
@@ -442,7 +442,7 @@ namespace hpx { namespace parallel { namespace util {
     prefetching::prefetcher_context<Itr, Ts const...> make_prefetcher_context(
         Itr base_begin, Itr base_end, std::size_t p_factor, Ts const&... rngs)
     {
-        static_assert(hpx::traits::is_random_access_iterator<Itr>::value,
+        static_assert(hpx::traits::is_random_access_iterator_v<Itr>,
             "Iterators have to be of random access iterator category");
         static_assert(hpx::util::all_of<hpx::traits::is_range<Ts>...>::value,
             "All variadic parameters have to represent ranges");
@@ -575,4 +575,5 @@ namespace hpx { namespace parallel { namespace util {
             }
         };
     }    // namespace detail
-}}}      // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util
+     // namespace hpx::parallel::util

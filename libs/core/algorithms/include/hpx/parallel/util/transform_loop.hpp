@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     ///////////////////////////////////////////////////////////////////////////
     namespace detail {
@@ -345,7 +345,8 @@ namespace hpx { namespace parallel { namespace util {
                 call(InIter it, std::size_t num, OutIter dest, F&& f,
                     std::false_type)
             {
-                std::size_t count(num & std::size_t(-4));    // -V112
+                std::size_t count(
+                    num & static_cast<std::size_t>(-4));    // -V112
                 for (std::size_t i = 0; i < count;
                      (void) ++it, i += 4)    // -V112
                 {
@@ -449,14 +450,15 @@ namespace hpx { namespace parallel { namespace util {
                 call(InIter it, std::size_t num, OutIter dest, F&& f,
                     std::false_type)
             {
-                std::size_t count(num & std::size_t(-4));    // -V112
+                std::size_t count(
+                    num & static_cast<std::size_t>(-4));    // -V112
                 for (std::size_t i = 0; i < count;
                      (void) ++it, i += 4)    // -V112
                 {
                     *dest++ = HPX_INVOKE(f, *it);
-                    *dest++ = HPX_INVOKE(f, *(++it));
-                    *dest++ = HPX_INVOKE(f, *(++it));
-                    *dest++ = HPX_INVOKE(f, *(++it));
+                    *dest++ = HPX_INVOKE(f, *++it);
+                    *dest++ = HPX_INVOKE(f, *++it);
+                    *dest++ = HPX_INVOKE(f, *++it);
                 }
                 for (/**/; count < num; (void) ++count, ++it, ++dest)
                 {
@@ -555,7 +557,8 @@ namespace hpx { namespace parallel { namespace util {
             call(InIter1 first1, std::size_t num, InIter2 first2, OutIter dest,
                 F&& f)
             {
-                std::size_t count(num & std::size_t(-4));    // -V112
+                std::size_t count(
+                    num & static_cast<std::size_t>(-4));    // -V112
                 for (std::size_t i = 0; i < count;
                      (void) ++first1, ++first2, i += 4)    // -V112
                 {
@@ -626,14 +629,15 @@ namespace hpx { namespace parallel { namespace util {
             call(InIter1 first1, std::size_t num, InIter2 first2, OutIter dest,
                 F&& f)
             {
-                std::size_t count(num & std::size_t(-4));    // -V112
+                std::size_t count(
+                    num & static_cast<std::size_t>(-4));    // -V112
                 for (std::size_t i = 0; i < count;
                      (void) ++first1, ++first2, i += 4)    // -V112
                 {
                     *dest++ = HPX_INVOKE(f, *first1, *first2);
-                    *dest++ = HPX_INVOKE(f, *(++first1), *(++first2));
-                    *dest++ = HPX_INVOKE(f, *(++first1), *(++first2));
-                    *dest++ = HPX_INVOKE(f, *(++first1), *(++first2));
+                    *dest++ = HPX_INVOKE(f, *++first1, *++first2);
+                    *dest++ = HPX_INVOKE(f, *++first1, *++first2);
+                    *dest++ = HPX_INVOKE(f, *++first1, *++first2);
                 }
                 for (/**/; count < num;
                      (void) ++count, ++first1, ++first2, ++dest)
@@ -684,4 +688,4 @@ namespace hpx { namespace parallel { namespace util {
     }
 #endif
 
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

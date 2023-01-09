@@ -1,5 +1,5 @@
 //  Copyright (c) 2015-2017 Francisco Jose Tapia
-//  Copyright (c) 2020 Hartmut Kaiser
+//  Copyright (c) 2020-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -9,6 +9,7 @@
 
 #include <hpx/config.hpp>
 #include <hpx/iterator_support/iterator_range.hpp>
+#include <hpx/iterator_support/traits/is_iterator.hpp>
 #include <hpx/parallel/algorithms/detail/distance.hpp>
 #include <hpx/parallel/util/low_level.hpp>
 
@@ -19,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace hpx { namespace parallel { namespace util {
+namespace hpx::parallel::util {
 
     /// \struct range
     /// \brief this represent a range between two iterators
@@ -47,11 +48,10 @@ namespace hpx { namespace parallel { namespace util {
     inline range<Iter2, Iter2> init_move(
         range<Iter2, Sent2> const& dest, range<Iter1, Sent1> const& src)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         if (src.size() == 0)
         {
@@ -74,11 +74,10 @@ namespace hpx { namespace parallel { namespace util {
     inline range<Iter2, Sent2> uninit_move(
         range<Iter2, Sent2> const& dest, range<Iter1, Sent1> const& src)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         if (src.size() == 0)
         {
@@ -124,13 +123,12 @@ namespace hpx { namespace parallel { namespace util {
     inline bool is_mergeable(range<Iter1, Sent1> const& src1,
         range<Iter2, Sent2> const& src2, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
-        return comp(*(src2.front()), *(src1.back()));
+        return comp(*src2.front(), *src1.back());
     }
 
     /// \brief Merge two contiguous ranges src1 and src2 , and put the result in
@@ -148,14 +146,12 @@ namespace hpx { namespace parallel { namespace util {
         range<Iter1, Sent1> const& src1, range<Iter2, Sent2> const& src2,
         Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
-        using type3 = typename std::iterator_traits<Iter3>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
+        using type3 = hpx::traits::iter_value_t<Iter3>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
-        static_assert(
-            std::is_same<type3, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type3, type2>, "Incompatible iterators\n");
 
         return range<Iter3, Sent3>(dest.begin(),
             full_merge(src1.begin(), src1.end(), src2.begin(), src2.end(),
@@ -173,17 +169,15 @@ namespace hpx { namespace parallel { namespace util {
     /// \return range with the elements merged and the size adjusted
     template <typename Iter1, typename Sent1, typename Iter2, typename Sent2,
         typename Value, typename Compare>
-    inline range<Value*> uninit_full_merge(const range<Value*>& dest,
+    inline range<Value*> uninit_full_merge(range<Value*> const& dest,
         range<Iter1, Sent1> const& src1, range<Iter2, Sent2> const& src2,
         Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
-        static_assert(
-            std::is_same<Value, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
+        static_assert(std::is_same_v<Value, type2>, "Incompatible iterators\n");
 
         return range<Value*>(dest.begin(),
             uninit_full_merge(src1.begin(), src1.end(), src2.begin(),
@@ -204,11 +198,10 @@ namespace hpx { namespace parallel { namespace util {
         range<Iter1, Sent1> const& src1, range<Iter2, Sent2> const& src2,
         Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         return range<Iter2, Sent2>(dest.begin(),
             half_merge(src1.begin(), src1.end(), src2.begin(), src2.end(),
@@ -230,14 +223,12 @@ namespace hpx { namespace parallel { namespace util {
     bool in_place_merge_uncontiguous(range<Iter1, Sent1> const& src1,
         range<Iter2, Sent2> const& src2, range<Iter3, Sent3>& aux, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
-        using type3 = typename std::iterator_traits<Iter3>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
+        using type3 = hpx::traits::iter_value_t<Iter3>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
-        static_assert(
-            std::is_same<type3, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type3, type2>, "Incompatible iterators\n");
 
         return in_place_merge_uncontiguous(src1.begin(), src1.end(),
             src2.begin(), src2.end(), aux.begin(), comp);
@@ -258,11 +249,10 @@ namespace hpx { namespace parallel { namespace util {
     inline range<Iter1, Sent1> in_place_merge(range<Iter1, Sent1> const& src1,
         range<Iter1, Sent1> const& src2, range<Iter2, Sent2>& buf, Compare comp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         in_place_merge(src1.begin(), src1.end(), src2.end(), buf.begin(), comp);
         return concat(src1, src2);
@@ -284,11 +274,10 @@ namespace hpx { namespace parallel { namespace util {
     inline void merge_flow(range<Iter1, Sent1> rng1, range<Iter2, Sent2> rbuf,
         range<Iter1, Sent1> rng2, Compare cmp)
     {
-        using type1 = typename std::iterator_traits<Iter1>::value_type;
-        using type2 = typename std::iterator_traits<Iter2>::value_type;
+        using type1 = hpx::traits::iter_value_t<Iter1>;
+        using type2 = hpx::traits::iter_value_t<Iter2>;
 
-        static_assert(
-            std::is_same<type1, type2>::value, "Incompatible iterators\n");
+        static_assert(std::is_same_v<type1, type2>, "Incompatible iterators\n");
 
         range<Iter2, Sent2> rbx(rbuf);
         range<Iter1, Sent1> rx1(rng1), rx2(rng2);
@@ -322,4 +311,4 @@ namespace hpx { namespace parallel { namespace util {
             util::half_merge(rbuf, rx2, rbx, cmp);
         }
     }
-}}}    // namespace hpx::parallel::util
+}    // namespace hpx::parallel::util

@@ -24,6 +24,8 @@ namespace hpx {
         }
     };
 
+    inline constexpr identity identity_v = identity();
+
     template <typename T>
     struct type_identity
     {

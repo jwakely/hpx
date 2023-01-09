@@ -652,7 +652,6 @@ namespace hpx { namespace ranges {
 #include <hpx/parallel/algorithms/inclusive_scan.hpp>
 #include <hpx/parallel/util/detail/algorithm_result.hpp>
 #include <hpx/parallel/util/detail/sender_util.hpp>
-#include <hpx/parallel/util/projection_identity.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -661,7 +660,7 @@ namespace hpx { namespace ranges {
 #include <utility>
 #include <vector>
 
-namespace hpx { namespace ranges {
+namespace hpx::ranges {
 
     template <typename I, typename O>
     using inclusive_scan_result = parallel::util::in_out_result<I, O>;
@@ -695,9 +694,8 @@ namespace hpx { namespace ranges {
 
             using result_type = inclusive_scan_result<InIter, OutIter>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(hpx::execution::seq, first, last, dest,
-                    HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                hpx::execution::seq, first, last, dest, HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -705,7 +703,7 @@ namespace hpx { namespace ranges {
             typename FwdIter2, typename Op = std::plus<typename
             std::iterator_traits<FwdIter1>::value_type>,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_iterator_v<FwdIter1> &&
                 hpx::traits::is_sentinel_for<Sent, FwdIter1>::value &&
                 hpx::traits::is_iterator_v<FwdIter2> &&
@@ -727,9 +725,9 @@ namespace hpx { namespace ranges {
 
             using result_type = inclusive_scan_result<FwdIter1, FwdIter2>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(HPX_FORWARD(ExPolicy, policy), first, last, dest,
-                    HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                HPX_FORWARD(ExPolicy, policy), first, last, dest,
+                HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -756,16 +754,16 @@ namespace hpx { namespace ranges {
             using result_type =
                 inclusive_scan_result<traits::range_iterator_t<Rng>, O>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(hpx::execution::seq, std::begin(rng), std::end(rng), dest,
-                    HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                hpx::execution::seq, std::begin(rng), std::end(rng), dest,
+                HPX_FORWARD(Op, op));
         }
 
         // clang-format off
         template <typename ExPolicy, typename Rng,  typename O,
             typename Op = std::plus<typename hpx::traits::range_traits<Rng>::value_type>,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_range<Rng>::value &&
                 hpx::is_invocable_v<Op,
                     typename hpx::traits::range_traits<Rng>::value_type,
@@ -787,9 +785,9 @@ namespace hpx { namespace ranges {
             using result_type =
                 inclusive_scan_result<traits::range_iterator_t<Rng>, O>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(HPX_FORWARD(ExPolicy, policy), std::begin(rng),
-                    std::end(rng), dest, HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                HPX_FORWARD(ExPolicy, policy), std::begin(rng), std::end(rng),
+                dest, HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -817,9 +815,9 @@ namespace hpx { namespace ranges {
 
             using result_type = inclusive_scan_result<InIter, OutIter>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(hpx::execution::seq, first, last, dest, HPX_MOVE(init),
-                    HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                hpx::execution::seq, first, last, dest, HPX_MOVE(init),
+                HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -827,7 +825,7 @@ namespace hpx { namespace ranges {
             typename FwdIter2, typename Op,
             typename T = typename std::iterator_traits<FwdIter1>::value_type,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_iterator_v<FwdIter1> &&
                 hpx::traits::is_sentinel_for<Sent, FwdIter1>::value &&
                 hpx::traits::is_iterator_v<FwdIter2> &&
@@ -849,9 +847,9 @@ namespace hpx { namespace ranges {
 
             using result_type = inclusive_scan_result<FwdIter1, FwdIter2>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(HPX_FORWARD(ExPolicy, policy), first, last, dest,
-                    HPX_MOVE(init), HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                HPX_FORWARD(ExPolicy, policy), first, last, dest,
+                HPX_MOVE(init), HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -880,9 +878,9 @@ namespace hpx { namespace ranges {
             using result_type =
                 inclusive_scan_result<traits::range_iterator_t<Rng>, O>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(hpx::execution::seq, std::begin(rng), std::end(rng), dest,
-                    HPX_MOVE(init), HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                hpx::execution::seq, std::begin(rng), std::end(rng), dest,
+                HPX_MOVE(init), HPX_FORWARD(Op, op));
         }
 
         // clang-format off
@@ -891,7 +889,7 @@ namespace hpx { namespace ranges {
             typename T = typename std::iterator_traits<
                 hpx::traits::range_iterator_t<Rng>>::value_type,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_range<Rng>::value &&
                 hpx::is_invocable_v<Op,
                     typename hpx::traits::range_traits<Rng>::value_type,
@@ -913,11 +911,12 @@ namespace hpx { namespace ranges {
             using result_type =
                 inclusive_scan_result<traits::range_iterator_t<Rng>, O>;
 
-            return hpx::parallel::v1::detail::inclusive_scan<result_type>()
-                .call(HPX_FORWARD(ExPolicy, policy), std::begin(rng),
-                    std::end(rng), dest, HPX_MOVE(init), HPX_FORWARD(Op, op));
+            return hpx::parallel::detail::inclusive_scan<result_type>().call(
+                HPX_FORWARD(ExPolicy, policy), std::begin(rng), std::end(rng),
+                dest, HPX_MOVE(init), HPX_FORWARD(Op, op));
         }
     } inclusive_scan{};
-}}    // namespace hpx::ranges
+}    // namespace hpx::ranges
+     // namespace hpx::ranges
 
 #endif

@@ -37,7 +37,7 @@ namespace hpx { namespace ranges {
     /// \tparam Comp        The type of the function/function object to use
     ///                     (deduced).
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a util::projection_identity
+    ///                     defaults to \a hpx::identity
     ///
     /// \param first        Refers to the beginning of the sequence of elements
     ///                     the algorithm will be applied to.
@@ -67,7 +67,7 @@ namespace hpx { namespace ranges {
     ///
     template <typename RandomIt, typename Sent,
         typename Comp = ranges::less,
-        typename Proj = parallel::util::projection_identity>
+        typename Proj = hpx::identity>
     RandomIt stable_sort(RandomIt first, Sent last, Comp&& comp = Comp(),
         Proj&& proj = Proj());
 
@@ -98,7 +98,7 @@ namespace hpx { namespace ranges {
     /// \tparam Comp        The type of the function/function object to use
     ///                     (deduced).
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a util::projection_identity
+    ///                     defaults to \a hpx::identity
     ///
     /// \param policy       The execution policy to use for the scheduling of
     ///                     the iterations.
@@ -142,7 +142,7 @@ namespace hpx { namespace ranges {
     ///
     template <typename ExPolicy, typename RandomIt, typename Sent,
         typename Comp = ranges::less,
-        typename Proj = parallel::util::projection_identity>
+        typename Proj = hpx::identity>
     typename parallel::util::detail::algorithm_result<ExPolicy,
         RandomIt>::type
     stable_sort(ExPolicy&& policy, RandomIt first, Sent last, Comp&& comp = Comp(),
@@ -169,7 +169,7 @@ namespace hpx { namespace ranges {
     /// \tparam Comp     The type of the function/function object to use
     ///                     (deduced).
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a util::projection_identity
+    ///                     defaults to \a hpx::identity
     ///
     /// \param rng          Refers to the sequence of elements the algorithm
     ///                     will be applied to.
@@ -196,7 +196,7 @@ namespace hpx { namespace ranges {
     ///           It returns \a last.
     template <typename Rng,
         typename Comp = ranges::less,
-        typename Proj = parallel::util::projection_identity>
+        typename Proj = hpx::identity>
     typename hpx::traits::range_iterator<Rng>::type
     stable_sort(Rng&& rng, Comp&& comp = Comp(), Proj&& proj = Proj());
 
@@ -225,7 +225,7 @@ namespace hpx { namespace ranges {
     /// \tparam Comp     The type of the function/function object to use
     ///                     (deduced).
     /// \tparam Proj        The type of an optional projection function. This
-    ///                     defaults to \a util::projection_identity
+    ///                     defaults to \a hpx::identity
     ///
     /// \param policy       The execution policy to use for the scheduling of
     ///                     the iterations.
@@ -267,7 +267,7 @@ namespace hpx { namespace ranges {
     ///
     template <typename ExPolicy, typename Rng,
         typename Comp = ranges::less,
-        typename Proj = parallel::util::projection_identity>
+        typename Proj = hpx::identity>
     typename parallel::util::detail::algorithm_result<ExPolicy,
         typename hpx::traits::range_iterator<Rng>::type>::type
     stable_sort(ExPolicy&& policy, Rng&& rng, Comp&& comp = Comp(),
@@ -279,26 +279,25 @@ namespace hpx { namespace ranges {
 #else
 
 #include <hpx/config.hpp>
+#include <hpx/algorithms/traits/projected_range.hpp>
 #include <hpx/concepts/concepts.hpp>
 #include <hpx/iterator_support/range.hpp>
 #include <hpx/iterator_support/traits/is_range.hpp>
-
-#include <hpx/algorithms/traits/projected_range.hpp>
 #include <hpx/parallel/algorithms/stable_sort.hpp>
 #include <hpx/parallel/util/detail/sender_util.hpp>
-#include <hpx/parallel/util/projection_identity.hpp>
+#include <hpx/type_support/identity.hpp>
 
 #include <type_traits>
 #include <utility>
 
-namespace hpx { namespace parallel { inline namespace rangev1 {
+namespace hpx::parallel {
 
     // clang-format off
     template <typename ExPolicy, typename Rng,
-        typename Comp = v1::detail::less,
-        typename Proj = util::projection_identity,
+        typename Comp = detail::less,
+        typename Proj = hpx::identity,
         HPX_CONCEPT_REQUIRES_(
-            hpx::is_execution_policy<ExPolicy>::value &&
+            hpx::is_execution_policy_v<ExPolicy> &&
             hpx::traits::is_range<Rng>::value &&
             traits::is_projected_range<Proj, Rng>::value &&
             traits::is_indirect_callable<ExPolicy, Comp,
@@ -323,7 +322,7 @@ namespace hpx { namespace parallel { inline namespace rangev1 {
         static_assert(hpx::traits::is_random_access_iterator_v<iterator_type>,
             "Requires a random access iterator.");
 
-        return parallel::v1::detail::stable_sort<iterator_type>().call(
+        return parallel::detail::stable_sort<iterator_type>().call(
             HPX_FORWARD(ExPolicy, policy), hpx::util::begin(rng),
             hpx::util::end(rng), HPX_FORWARD(Comp, comp),
             HPX_FORWARD(Proj, proj));
@@ -331,9 +330,10 @@ namespace hpx { namespace parallel { inline namespace rangev1 {
 #pragma GCC diagnostic pop
 #endif
     }
-}}}    // namespace hpx::parallel::rangev1
+}    // namespace hpx::parallel
+// namespace hpx::parallel::rangev1
 
-namespace hpx { namespace ranges {
+namespace hpx::ranges {
     ///////////////////////////////////////////////////////////////////////////
     // CPO for hpx::ranges::stable_sort
     inline constexpr struct stable_sort_t final
@@ -343,7 +343,7 @@ namespace hpx { namespace ranges {
         // clang-format off
         template <typename RandomIt, typename Sent,
             typename Comp = ranges::less,
-            typename Proj = parallel::util::projection_identity,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
                 hpx::traits::is_iterator_v<RandomIt> &&
                 hpx::traits::is_sentinel_for<Sent, RandomIt>::value &&
@@ -362,7 +362,7 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_random_access_iterator_v<RandomIt>,
                 "Requires a random access iterator.");
 
-            return hpx::parallel::v1::detail::stable_sort<RandomIt>().call(
+            return hpx::parallel::detail::stable_sort<RandomIt>().call(
                 hpx::execution::seq, first, last, HPX_FORWARD(Comp, comp),
                 HPX_FORWARD(Proj, proj));
         }
@@ -370,9 +370,9 @@ namespace hpx { namespace ranges {
         // clang-format off
         template <typename ExPolicy, typename RandomIt, typename Sent,
             typename Comp = ranges::less,
-            typename Proj = parallel::util::projection_identity,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_iterator_v<RandomIt> &&
                 hpx::traits::is_sentinel_for<Sent, RandomIt>::value &&
                 parallel::traits::is_projected<Proj, RandomIt>::value &&
@@ -391,7 +391,7 @@ namespace hpx { namespace ranges {
             static_assert(hpx::traits::is_random_access_iterator_v<RandomIt>,
                 "Requires a random access iterator.");
 
-            return hpx::parallel::v1::detail::stable_sort<RandomIt>().call(
+            return hpx::parallel::detail::stable_sort<RandomIt>().call(
                 HPX_FORWARD(ExPolicy, policy), first, last,
                 HPX_FORWARD(Comp, comp), HPX_FORWARD(Proj, proj));
         }
@@ -399,7 +399,7 @@ namespace hpx { namespace ranges {
         // clang-format off
         template <typename Rng,
             typename Comp = ranges::less,
-            typename Proj = parallel::util::projection_identity,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
                 hpx::traits::is_range<Rng>::value &&
                 parallel::traits::is_projected_range<Proj, Rng>::value &&
@@ -421,7 +421,7 @@ namespace hpx { namespace ranges {
                 hpx::traits::is_random_access_iterator_v<iterator_type>,
                 "Requires a random access iterator.");
 
-            return hpx::parallel::v1::detail::stable_sort<iterator_type>().call(
+            return hpx::parallel::detail::stable_sort<iterator_type>().call(
                 hpx::execution::seq, hpx::util::begin(rng), hpx::util::end(rng),
                 HPX_FORWARD(Comp, comp), HPX_FORWARD(Proj, proj));
         }
@@ -429,9 +429,9 @@ namespace hpx { namespace ranges {
         // clang-format off
         template <typename ExPolicy, typename Rng,
             typename Comp = ranges::less,
-            typename Proj = parallel::util::projection_identity,
+            typename Proj = hpx::identity,
             HPX_CONCEPT_REQUIRES_(
-                hpx::is_execution_policy<ExPolicy>::value &&
+                hpx::is_execution_policy_v<ExPolicy> &&
                 hpx::traits::is_range<Rng>::value &&
                 parallel::traits::is_projected_range<Proj, Rng>::value &&
                 parallel::traits::is_indirect_callable<ExPolicy, Comp,
@@ -452,12 +452,12 @@ namespace hpx { namespace ranges {
                 hpx::traits::is_random_access_iterator_v<iterator_type>,
                 "Requires a random access iterator.");
 
-            return hpx::parallel::v1::detail::stable_sort<iterator_type>().call(
+            return hpx::parallel::detail::stable_sort<iterator_type>().call(
                 HPX_FORWARD(ExPolicy, policy), hpx::util::begin(rng),
                 hpx::util::end(rng), HPX_FORWARD(Comp, comp),
                 HPX_FORWARD(Proj, proj));
         }
     } stable_sort{};
-}}    // namespace hpx::ranges
+}    // namespace hpx::ranges
 
 #endif

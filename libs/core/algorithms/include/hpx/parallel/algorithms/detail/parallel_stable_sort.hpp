@@ -8,31 +8,24 @@
 #pragma once
 
 #include <hpx/assert.hpp>
-#include <hpx/execution/executors/execution.hpp>
-#include <hpx/execution/executors/execution_information.hpp>
 #include <hpx/executors/exception_list.hpp>
 #include <hpx/parallel/algorithms/detail/sample_sort.hpp>
-#include <hpx/parallel/util/detail/algorithm_result.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <iterator>
-#include <list>
-#include <memory>
-#include <stdexcept>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
-namespace hpx { namespace parallel { inline namespace v1 { namespace detail {
-
+    namespace hpx::parallel::detail
+{
     static constexpr std::size_t stable_sort_limit_per_task = 1 << 16;
 
     /// \struct parallel_stable_sort
-    /// \brief This a structure for to implement a parallel stable sort
-    ///        exception safe
+    ///
+    /// This a structure for to implement a parallel stable sort exception safe
     template <typename Iter, typename Sent, typename Compare>
     struct parallel_stable_sort_helper
     {
@@ -63,10 +56,9 @@ namespace hpx { namespace parallel { inline namespace v1 { namespace detail {
 
     /// \brief constructor of the typename
     ///
-    /// \param [in] range_initial : range of elements to sort
+    /// \param [in] first : range of elements to sort
+    /// \param [in] last : range of elements to sort
     /// \param [in] comp : object for to compare two elements
-    /// \param [in] nthread : define the number of threads to use
-    ///                  in the process. By default is the number of thread HW
     template <typename Iter, typename Sent, typename Compare>
     parallel_stable_sort_helper<Iter, Sent,
         Compare>::parallel_stable_sort_helper(Iter first, Sent last,
@@ -145,11 +137,11 @@ namespace hpx { namespace parallel { inline namespace v1 { namespace detail {
     }
 
     template <typename Exec, typename Iter, typename Sent, typename Compare>
-    Iter parallel_stable_sort(Exec&& exec, Iter first, Sent last,
-        std::size_t cores, std::size_t chunk_size, Compare&& comp)
+    Iter parallel_stable_sort(Exec && exec, Iter first, Sent last,
+        std::size_t cores, std::size_t chunk_size, Compare && comp)
     {
-        using parallel_stable_sort_helper_t = parallel_stable_sort_helper<Iter,
-            Sent, typename std::decay<Compare>::type>;
+        using parallel_stable_sort_helper_t =
+            parallel_stable_sort_helper<Iter, Sent, std::decay_t<Compare>>;
 
         parallel_stable_sort_helper_t sorter(
             first, last, HPX_FORWARD(Compare, comp));
@@ -158,7 +150,7 @@ namespace hpx { namespace parallel { inline namespace v1 { namespace detail {
     }
 
     template <typename Exec, typename Iter, typename Sent>
-    Iter parallel_stable_sort(Exec&& exec, Iter first, Sent last)
+    Iter parallel_stable_sort(Exec && exec, Iter first, Sent last)
     {
         using compare =
             std::less<typename std::iterator_traits<Iter>::value_type>;
@@ -168,4 +160,4 @@ namespace hpx { namespace parallel { inline namespace v1 { namespace detail {
             compare{});
     }
 
-}}}}    // namespace hpx::parallel::v1::detail
+}    // namespace hpx::parallel::detail
