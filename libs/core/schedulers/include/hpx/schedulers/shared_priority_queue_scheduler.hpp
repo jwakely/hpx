@@ -329,6 +329,7 @@ namespace hpx::threads::policies {
                         , "parent offset", parent_pool_->get_thread_offset()
                         , parent_pool_->get_pool_name());
                     // clang-format on
+
                     // This is a task being injected from a thread on another
                     // pool - we can schedule on any thread available
                     thread_num = numa_holder_[0].thread_queue(0)->worker_next(
@@ -410,11 +411,15 @@ namespace hpx::threads::policies {
                     "Invalid schedule hint mode: {}",
                     static_cast<std::size_t>(data.schedulehint.mode));
             }
+
             // we do not allow threads created on other queues to 'run now'
             // as this causes cross-thread allocations and map accesses
-            if (local_num != thread_num)
+            if (local_num != thread_num &&
+                (data.initial_state == thread_schedule_state::pending ||
+                    data.initial_state == thread_schedule_state::pending_boost))
             {
                 data.run_now = false;
+
                 // clang-format off
                 spq_deb.debug(debug::str<>("create_thread")
                     , "pool", parent_pool_->get_pool_name()

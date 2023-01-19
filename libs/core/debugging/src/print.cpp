@@ -250,7 +250,7 @@ namespace hpx::debug {
         char const* hostname_print_helper::get_hostname() const
         {
             static bool initialized = false;
-            static char hostname_[20] = {'\0'};
+            static char hostname_[32] = {'\0'};
             if (!initialized)
             {
                 initialized = true;
@@ -258,7 +258,7 @@ namespace hpx::debug {
                 gethostname(hostname_, std::size_t(12));
 #endif
                 int rank = guess_rank();
-                if (rank != -1)
+                if (rank >= 0)
                 {
                     std::string temp = "(" + std::to_string(guess_rank()) + ")";
                     std::strcat(hostname_, temp.c_str());
@@ -284,7 +284,6 @@ namespace hpx::debug {
                     auto pos = e.find(s);
                     if (pos != std::string::npos)
                     {
-                        //std::cout << "Got a rank string : " << e << std::endl;
                         return std::stoi(e.substr(pos + s.size(), 5));
                     }
                 }

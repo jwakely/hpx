@@ -133,7 +133,7 @@ namespace hpx::threads::detail {
     void scheduled_thread_pool<Scheduler>::print_pool(std::ostream& os) const
     {
         os << "[pool \"" << id_.name() << "\", #" << id_.index()    //-V128
-           << "] with scheduler " << Scheduler::get_scheduler_name()
+           << "] with scheduler: " << sched_->Scheduler::get_scheduler_name()
            << "\nis running on PUs : \n";
         os << hpx::threads::to_string(get_used_processing_units())
 #ifdef HPX_HAVE_MAX_CPU_COUNT
@@ -141,10 +141,8 @@ namespace hpx::threads::detail {
            << std::bitset<HPX_HAVE_MAX_CPU_COUNT>(get_used_processing_units())
 #endif
            << '\n';
-        os << "on numa domains : \n" << get_numa_domain_bitmap() << '\n';
-        os << "pool offset : \n"
-           << std::dec << static_cast<std::uint64_t>(this->thread_offset_)
-           << "\n";
+        os << "on numa domains: " << get_numa_domain_bitmap() << '\n';
+        os << "pool offset: " << std::dec << this->thread_offset_ << "\n";
     }
 
     template <typename Scheduler>
@@ -180,7 +178,8 @@ namespace hpx::threads::detail {
         std::size_t num_thread) const
     {
         HPX_ASSERT(num_thread != std::size_t(-1));
-        return sched_->Scheduler::get_state(num_thread).load();
+        return sched_->Scheduler::get_state(num_thread)
+            .load(std::memory_order_acquire);
     }
 
     template <typename Scheduler>

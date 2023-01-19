@@ -38,9 +38,9 @@ namespace hpx { namespace lcos { namespace detail {
     struct dataflow_finalization;
 }}}    // namespace hpx::lcos::detail
 
+#if defined(HPX_HAVE_THREAD_DESCRIPTION)
 namespace hpx { namespace traits {
 
-#if defined(HPX_HAVE_THREAD_DESCRIPTION)
     ///////////////////////////////////////////////////////////////////////////
     // traits specialization to get annotation from dataflow_finalization
     template <typename Frame>
@@ -56,8 +56,8 @@ namespace hpx { namespace traits {
             return annotation;
         }
     };
-#endif
 }}    // namespace hpx::traits
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace lcos { namespace detail {
@@ -348,13 +348,9 @@ namespace hpx { namespace lcos { namespace detail {
         // clang-format on
         HPX_FORCEINLINE void finalize(Executor&& exec, Futures_&& futures)
         {
-#if defined(HPX_CUDA_VERSION)
-            std::forward<Executor>(exec)
-#else
-            HPX_FORWARD(Executor, exec)
-#endif
-                .dataflow_finalize(
-                    this, HPX_MOVE(func_), HPX_FORWARD(Futures_, futures));
+            // uses std::forward for HPX_CUDA_VERSION
+            std::forward<Executor>(exec).dataflow_finalize(
+                this, HPX_MOVE(func_), HPX_FORWARD(Futures_, futures));
         }
 
     public:

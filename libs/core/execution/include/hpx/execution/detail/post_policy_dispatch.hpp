@@ -1,4 +1,4 @@
-//  Copyright (c) 2017-2022 Hartmut Kaiser
+//  Copyright (c) 2017-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -32,7 +32,7 @@ namespace hpx::detail {
     struct post_policy_dispatch<launch::async_policy>
     {
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy policy,
             hpx::threads::thread_description const& desc,
             threads::thread_pool_base* pool, F&& f, Ts&&... ts)
         {
@@ -46,11 +46,12 @@ namespace hpx::detail {
         }
 
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const& desc, F&& f, Ts&&... ts)
         {
-            call(policy, desc, threads::detail::get_self_or_default_pool(),
-                HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+            call(HPX_FORWARD(Policy, policy), desc,
+                threads::detail::get_self_or_default_pool(), HPX_FORWARD(F, f),
+                HPX_FORWARD(Ts, ts)...);
         }
     };
 
@@ -58,7 +59,7 @@ namespace hpx::detail {
     struct post_policy_dispatch<launch::fork_policy>
     {
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy policy,
             hpx::threads::thread_description const& desc,
             threads::thread_pool_base* pool, F&& f, Ts&&... ts)
         {
@@ -88,11 +89,12 @@ namespace hpx::detail {
         }
 
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const& desc, F&& f, Ts&&... ts)
         {
-            call(policy, desc, threads::detail::get_self_or_default_pool(),
-                HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+            call(HPX_FORWARD(Policy, policy), desc,
+                threads::detail::get_self_or_default_pool(), HPX_FORWARD(F, f),
+                HPX_FORWARD(Ts, ts)...);
         }
     };
 
@@ -100,20 +102,22 @@ namespace hpx::detail {
     struct post_policy_dispatch<launch::sync_policy>
     {
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const&, threads::thread_pool_base*,
             F&& f, Ts&&... ts)
         {
             hpx::detail::sync_launch_policy_dispatch<launch::sync_policy>::call(
-                policy, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                HPX_FORWARD(Policy, policy), HPX_FORWARD(F, f),
+                HPX_FORWARD(Ts, ts)...);
         }
 
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const&, F&& f, Ts&&... ts)
         {
             hpx::detail::sync_launch_policy_dispatch<launch::sync_policy>::call(
-                policy, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                HPX_FORWARD(Policy, policy), HPX_FORWARD(F, f),
+                HPX_FORWARD(Ts, ts)...);
         }
     };
 
@@ -121,22 +125,22 @@ namespace hpx::detail {
     struct post_policy_dispatch<launch::deferred_policy>
     {
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const&, threads::thread_pool_base*,
             F&& f, Ts&&... ts)
         {
             hpx::detail::sync_launch_policy_dispatch<
-                launch::deferred_policy>::call(policy, HPX_FORWARD(F, f),
-                HPX_FORWARD(Ts, ts)...);
+                launch::deferred_policy>::call(HPX_FORWARD(Policy, policy),
+                HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
         }
 
         template <typename Policy, typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy&& policy,
             hpx::threads::thread_description const&, F&& f, Ts&&... ts)
         {
             hpx::detail::sync_launch_policy_dispatch<
-                launch::deferred_policy>::call(policy, HPX_FORWARD(F, f),
-                HPX_FORWARD(Ts, ts)...);
+                launch::deferred_policy>::call(HPX_FORWARD(Policy, policy),
+                HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
         }
     };
 
@@ -144,39 +148,44 @@ namespace hpx::detail {
     struct post_policy_dispatch
     {
         template <typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy policy,
             hpx::threads::thread_description const& desc,
             threads::thread_pool_base* pool, F&& f, Ts&&... ts)
         {
             if (policy == launch::sync)
             {
-                post_policy_dispatch<launch::sync_policy>::call(policy, desc,
-                    pool, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                post_policy_dispatch<launch::sync_policy>::call(
+                    HPX_MOVE(policy), desc, pool, HPX_FORWARD(F, f),
+                    HPX_FORWARD(Ts, ts)...);
             }
             else if (policy == launch::deferred)
             {
                 // execute synchronously
-                post_policy_dispatch<launch::deferred_policy>::call(policy,
-                    desc, pool, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                post_policy_dispatch<launch::deferred_policy>::call(
+                    HPX_MOVE(policy), desc, pool, HPX_FORWARD(F, f),
+                    HPX_FORWARD(Ts, ts)...);
             }
             else if (policy == launch::fork)
             {
-                post_policy_dispatch<launch::fork_policy>::call(policy, desc,
-                    pool, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                post_policy_dispatch<launch::fork_policy>::call(
+                    HPX_MOVE(policy), desc, pool, HPX_FORWARD(F, f),
+                    HPX_FORWARD(Ts, ts)...);
             }
             else
             {
-                post_policy_dispatch<launch::async_policy>::call(policy, desc,
-                    pool, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+                post_policy_dispatch<launch::async_policy>::call(
+                    HPX_MOVE(policy), desc, pool, HPX_FORWARD(F, f),
+                    HPX_FORWARD(Ts, ts)...);
             }
         }
 
         template <typename F, typename... Ts>
-        static void call(Policy const& policy,
+        static void call(Policy policy,
             hpx::threads::thread_description const& desc, F&& f, Ts&&... ts)
         {
-            call(policy, desc, threads::detail::get_self_or_default_pool(),
-                HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
+            call(HPX_MOVE(policy), desc,
+                threads::detail::get_self_or_default_pool(), HPX_FORWARD(F, f),
+                HPX_FORWARD(Ts, ts)...);
         }
     };
 }    // namespace hpx::detail

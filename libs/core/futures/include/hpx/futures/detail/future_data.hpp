@@ -877,44 +877,30 @@ namespace hpx::lcos::detail {
             return this->future_data<Result>::wait_until(abs_time, ec);
         }
 
-    private:
+    protected:
         bool started_test() const noexcept
         {
-            std::lock_guard<mutex_type> l(mtx_);
-            return started_;
+            return started_.load(std::memory_order_acquire);
         }
 
-        template <typename Lock>
-        bool started_test_and_set_locked(Lock& l)
-        {
-            HPX_ASSERT_OWNS_LOCK(l);
-            if (started_)
-            {
-                return true;
-            }
-            started_ = true;
-            return false;
-        }
-
-    protected:
+        // returns whether this task was started before
         bool started_test_and_set()
         {
-            std::lock_guard<mutex_type> l(mtx_);
-            return started_test_and_set_locked(l);
+            if (!started_.load(std::memory_order_relaxed))
+            {
+                return started_.exchange(true, std::memory_order_release);
+            }
+            return true;
         }
 
         void check_started()
         {
-            std::unique_lock<mutex_type> l(mtx_);
-            if (started_)
+            if (started_test_and_set())
             {
-                l.unlock();
                 HPX_THROW_EXCEPTION(hpx::error::task_already_started,
                     "task_base::check_started",
                     "this task has already been started");
-                return;
             }
-            started_ = true;
         }
 
     public:
@@ -958,7 +944,7 @@ namespace hpx::lcos::detail {
         }
 
     protected:
-        bool started_ = false;
+        std::atomic<bool> started_;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1029,10 +1015,9 @@ namespace hpx::lcos::detail {
 
         void cancel() override
         {
-            std::unique_lock<mutex_type> l(mtx_);
             hpx::detail::try_catch_exception_ptr(
                 [&]() {
-                    if (!this->started_)
+                    if (!this->started_test_and_set())
                     {
                         HPX_THROW_THREAD_INTERRUPTED_EXCEPTION();
                     }
@@ -1042,12 +1027,11 @@ namespace hpx::lcos::detail {
                         return;    // nothing we can do
                     }
 
+                    std::unique_lock<mutex_type> l(mtx_);
                     if (id_ != threads::invalid_thread_id)
                     {
                         // interrupt the executing thread
                         threads::interrupt_thread(id_);
-
-                        this->started_ = true;
 
                         l.unlock();
                         this->set_error(hpx::error::future_cancelled,
@@ -1064,7 +1048,7 @@ namespace hpx::lcos::detail {
                     }
                 },
                 [&](std::exception_ptr ep) {
-                    this->started_ = true;
+                    HPX_ASSERT(this->started_test());
                     this->set_exception(ep);
                     std::rethrow_exception(HPX_MOVE(ep));
                 });

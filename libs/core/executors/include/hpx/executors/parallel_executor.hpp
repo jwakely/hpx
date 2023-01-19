@@ -319,7 +319,7 @@ namespace hpx::execution {
 #else
             hpx::threads::thread_description desc(f);
 #endif
-            auto pool = exec.pool_ ?
+            auto* pool = exec.pool_ ?
                 exec.pool_ :
                 threads::detail::get_self_or_default_pool();
             return hpx::detail::async_launch_policy_dispatch<Policy>::call(
@@ -364,7 +364,7 @@ namespace hpx::execution {
 #else
             hpx::threads::thread_description desc(f);
 #endif
-            auto pool =
+            auto* pool =
                 pool_ ? pool_ : threads::detail::get_self_or_default_pool();
             hpx::detail::post_policy_dispatch<Policy>::call(
                 policy_, desc, pool, HPX_FORWARD(F, f), HPX_FORWARD(Ts, ts)...);
@@ -394,7 +394,7 @@ namespace hpx::execution {
 #else
             hpx::threads::thread_description desc(f);
 #endif
-            auto pool = exec.pool_ ?
+            auto* pool = exec.pool_ ?
                 exec.pool_ :
                 threads::detail::get_self_or_default_pool();
 
@@ -402,7 +402,7 @@ namespace hpx::execution {
                 exec.policy().get_hint().sharing_mode());
 
             // use scheduling based on index_queue if no hierarchical threshold
-            // is given
+            // is given and tasks are allowed to be combined
             if (exec.hierarchical_threshold_ == 0 && !do_not_combine_tasks)
             {
                 return parallel::execution::detail::

@@ -382,15 +382,9 @@ namespace hpx {
 
         virtual std::string get_locality_name() const;
 
-        virtual std::uint32_t assign_cores(std::string const&, std::uint32_t)
-        {
-            return std::uint32_t(-1);
-        }
+        virtual std::uint32_t assign_cores(std::string const&, std::uint32_t);
 
-        virtual std::uint32_t assign_cores()
-        {
-            return std::uint32_t(-1);
-        }
+        virtual std::uint32_t assign_cores();
 
     protected:
         void init_global_data();

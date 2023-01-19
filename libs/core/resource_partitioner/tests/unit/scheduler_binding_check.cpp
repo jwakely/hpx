@@ -61,8 +61,8 @@ void threadLoop()
         HPX_TEST_EQ(thread_actual, thread_expected);
     };
 
-    std::size_t threads = hpx::get_num_worker_threads();
     // launch tasks on threads using numbering 0,1,2,3...0,1,2,3
+    std::size_t threads = hpx::get_num_worker_threads();
     for (std::size_t i = 0; i < iterations; ++i)
     {
         auto exec = hpx::execution::parallel_executor(

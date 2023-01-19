@@ -95,7 +95,10 @@ namespace hpx::lcos::local {
             threads::thread_id_ref_type post(threads::thread_pool_base* pool,
                 char const* annotation, launch policy, error_code& ec) override
             {
-                this->check_started();
+                if (this->started_test_and_set())
+                {
+                    return threads::invalid_thread_id;
+                }
 
                 hpx::intrusive_ptr<base_type> this_(this);
                 if (policy == launch::fork)
@@ -237,13 +240,14 @@ namespace hpx::lcos::local {
             {
                 if (exec_)
                 {
-                    this->check_started();
-
-                    hpx::intrusive_ptr<base_type> this_(this);
-                    parallel::execution::post(*exec_,
-                        util::deferred_call(
-                            &base_type::run_impl, HPX_MOVE(this_)),
-                        exec_->get_schedulehint(), annotation);
+                    if (!this->started_test_and_set())
+                    {
+                        hpx::intrusive_ptr<base_type> this_(this);
+                        parallel::execution::post(*exec_,
+                            util::deferred_call(
+                                &base_type::run_impl, HPX_MOVE(this_)),
+                            exec_->get_schedulehint(), annotation);
+                    }
                     return threads::invalid_thread_id;
                 }
 
@@ -722,7 +726,7 @@ namespace hpx::lcos::local {
             launch policy = launch::async, error_code& ec = throws) const
         {
             return post(threads::detail::get_self_or_default_pool(), annotation,
-                policy, ec);
+                HPX_MOVE(policy), ec);
         }
 
         threads::thread_id_ref_type post(threads::thread_pool_base* pool,
@@ -736,7 +740,7 @@ namespace hpx::lcos::local {
                     "futures_factory invalid (has it been moved?)");
                 return threads::invalid_thread_id;
             }
-            return task_->post(pool, annotation, policy, ec);
+            return task_->post(pool, annotation, HPX_MOVE(policy), ec);
         }
 
         // This is the same as get_future, except that it moves the

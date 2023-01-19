@@ -250,7 +250,7 @@ namespace hpx::threads::policies {
             std::size_t num_thread = std::size_t(-1)) const = 0;
 #endif
 
-        virtual void reset_thread_distribution() {}
+        virtual void reset_thread_distribution() noexcept {}
 
         std::ptrdiff_t get_stack_size(
             threads::thread_stacksize stacksize) const noexcept
