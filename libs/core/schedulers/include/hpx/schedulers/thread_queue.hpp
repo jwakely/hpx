@@ -419,8 +419,8 @@ namespace hpx::threads::policies {
                     thread_id_type tid(todelete);
                     --terminated_items_count_;
 
-                    // this thread has to be in this map, except if it has
-                    // changed its priority, then it could be elsewhere
+                    // this thread has to be in this map, except if it has changed
+                    // its priority, then it could be elsewhere
                     HPX_ASSERT(thread_map_.find(tid) != thread_map_.end());
 
                     if (thread_map_.erase(tid) != 0)
@@ -443,8 +443,7 @@ namespace hpx::threads::policies {
 
             if (delete_all)
             {
-                // do not lock mutex while deleting all threads, do it
-                // piece-wise
+                // do not lock mutex while deleting all threads, do it piece-wise
                 while (true)
                 {
                     std::unique_lock<mutex_type> lk(mtx_, std::try_to_lock);

@@ -889,7 +889,7 @@ namespace hpx::threads::policies {
         // Return the next thread to be executed, return false if none is
         // available
         bool get_next_thread(std::size_t num_thread, bool running,
-            thread_id_ref_type& thrd, bool enable_stealing) override
+            thread_id_ref_type& thrd, bool enable_stealing)
         {
             HPX_ASSERT(num_thread < num_queues_);
 
@@ -1650,7 +1650,7 @@ namespace hpx::threads::policies {
         bool wait_or_add_new(std::size_t num_thread, bool running,
             [[maybe_unused]] std::int64_t& idle_loop_count,
             bool enable_stealing, std::size_t& added,
-            thread_id_ref_type* next_thrd = nullptr) override
+            thread_id_ref_type* next_thrd = nullptr)
         {
             HPX_ASSERT(num_thread < num_queues_);
 
