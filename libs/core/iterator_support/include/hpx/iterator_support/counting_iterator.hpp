@@ -1,4 +1,4 @@
-//  Copyright (c) 2020-2022 Hartmut Kaiser
+//  Copyright (c) 2020-2023 Hartmut Kaiser
 //
 //  SPDX-License-Identifier: BSL-1.0
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -104,6 +104,7 @@ namespace hpx::util {
 
     public:
         counting_iterator() = default;
+        ~counting_iterator() = default;
         counting_iterator(counting_iterator&& rhs) = default;
         counting_iterator& operator=(counting_iterator&& rhs) = default;
         counting_iterator(counting_iterator const& rhs) = default;
@@ -137,6 +138,7 @@ namespace hpx::util {
 
     public:
         counting_iterator() = default;
+        ~counting_iterator() = default;
         counting_iterator(counting_iterator&& rhs) = default;
         counting_iterator& operator=(counting_iterator&& rhs) = default;
         counting_iterator(counting_iterator const& rhs) = default;
@@ -197,8 +199,9 @@ namespace hpx::util {
     HPX_DEPRECATED_V(1, 9,
         "hpx::util::make_counting_iterator is deprecated, use "
         "hpx::util::counting_iterator instead")
-    HPX_HOST_DEVICE inline constexpr counting_iterator<
-        Incrementable> make_counting_iterator(Incrementable x) noexcept
+    HPX_HOST_DEVICE
+        constexpr counting_iterator<Incrementable> make_counting_iterator(
+            Incrementable x) noexcept
     {
         return counting_iterator<Incrementable>(HPX_MOVE(x));
     }

@@ -1,5 +1,5 @@
 //  Copyright (c) 2011 Thomas Heller
-//  Copyright (c) 2013-2022 Hartmut Kaiser
+//  Copyright (c) 2013-2023 Hartmut Kaiser
 //  Copyright (c) 2014-2015 Agustin Berge
 //
 //  SPDX-License-Identifier: BSL-1.0
@@ -30,9 +30,6 @@ namespace hpx::util::detail {
     };
 
     template <typename VTable, typename T>
-    constexpr VTable vtables<VTable, T>::instance;
-
-    template <typename VTable, typename T>
     constexpr VTable const* get_vtable() noexcept
     {
         static_assert(
@@ -47,13 +44,13 @@ namespace hpx::util::detail {
         template <typename T>
         static T& get(void* obj) noexcept
         {
-            return *reinterpret_cast<T*>(obj);
+            return *static_cast<T*>(obj);
         }
 
         template <typename T>
         static T const& get(void const* obj) noexcept
         {
-            return *reinterpret_cast<T const*>(obj);
+            return *static_cast<T const*>(obj);
         }
 
         template <typename T>
@@ -88,7 +85,7 @@ namespace hpx::util::detail {
 
         template <typename T>
         explicit constexpr vtable(construct_vtable<T>) noexcept
-          : deallocate(&vtable::template _deallocate<T>)
+          : deallocate(&vtable::_deallocate<T>)
         {
         }
     };

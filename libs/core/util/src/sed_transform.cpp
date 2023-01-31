@@ -73,9 +73,9 @@ namespace hpx::util {
 
     struct sed_transform::command
     {
-        command(std::string const& search, std::string const& replace)
+        command(std::string const& search, std::string replace)
           : search_(search)
-          , replace_(replace)
+          , replace_(HPX_MOVE(replace))
         {
         }
 
@@ -83,9 +83,8 @@ namespace hpx::util {
         std::string replace_;
     };
 
-    sed_transform::sed_transform(
-        std::string const& search, std::string const& replace)
-      : command_(std::make_shared<command>(search, replace))
+    sed_transform::sed_transform(std::string const& search, std::string replace)
+      : command_(std::make_shared<command>(search, HPX_MOVE(replace)))
     {
     }
 
@@ -94,7 +93,9 @@ namespace hpx::util {
         std::string search, replace;
 
         if (parse_sed_expression(expression, search, replace))
-            command_ = std::make_shared<command>(search, replace);
+        {
+            command_ = std::make_shared<command>(search, HPX_MOVE(replace));
+        }
     }
 
     std::string sed_transform::operator()(std::string const& input) const
